@@ -1,0 +1,39 @@
+.tag {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: var(--radius-tag);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.ai {
+  background: var(--ai-100);
+  color: var(--ai-700);
+}
+
+.warn {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.bad {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+
+.neutral {
+  background: var(--neutral-bg);
+  color: var(--neutral);
+}
+
+.lime {
+  background: var(--lime-50);
+  color: var(--lime-700);
+}

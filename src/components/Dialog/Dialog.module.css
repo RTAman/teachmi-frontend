@@ -1,0 +1,38 @@
+.dialog {
+  width: calc(min(100vw, var(--app-width)) - 48px);
+  max-width: none;
+  padding: 24px var(--page-gutter) var(--page-gutter);
+  border: 0;
+  border-radius: var(--radius-modal);
+  background: var(--surface);
+  color: var(--ink);
+  text-align: center;
+}
+
+.dialog::backdrop {
+  background: var(--dim);
+}
+
+.character {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+}
+
+.body {
+  margin-top: 13px;
+  color: var(--sub);
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.actions {
+  margin-top: 17px;
+}

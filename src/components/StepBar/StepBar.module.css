@@ -1,0 +1,46 @@
+.wrap {
+  padding: 4px var(--page-gutter) 16px;
+}
+
+.labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.label {
+  color: var(--lime-700);
+  font-weight: 700;
+}
+
+.count {
+  color: var(--sub);
+  font-family: var(--font-mono);
+  white-space: pre;
+}
+
+.track {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+.segment {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.on {
+  background: var(--accent-point);
+}
+
+.trackThin {
+  gap: 2px;
+}
+
+.trackThin .segment {
+  height: 3px;
+  border-radius: 0;
+}

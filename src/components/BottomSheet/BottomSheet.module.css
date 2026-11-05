@@ -1,0 +1,65 @@
+.sheet {
+  width: min(100vw, var(--app-width));
+  max-width: none;
+  max-height: calc(100dvh - var(--keyboard-inset, 0px) - 40px);
+  margin: auto auto var(--keyboard-inset, 0px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-modal) var(--radius-modal) 0 0;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.sheet::backdrop {
+  background: var(--dim);
+}
+
+.inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  padding: 32px var(--page-gutter) max(24px, calc(12px + env(safe-area-inset-bottom, 0px)));
+}
+
+.grab {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line-strong);
+  transform: translateX(-50%);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -10px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-icon-button);
+  background: none;
+  cursor: pointer;
+}
+
+.actions {
+  margin-top: 4px;
+}

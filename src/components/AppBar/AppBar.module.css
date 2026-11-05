@@ -1,0 +1,78 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 60px;
+  padding-inline: 8px;
+}
+
+.noBack {
+  padding-left: var(--page-gutter);
+}
+
+.back {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-icon-button);
+  background: none;
+  cursor: pointer;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.title,
+.subtitle {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.titleWithSubtitle {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 22px;
+}
+
+.subtitle {
+  color: var(--sub);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.counter {
+  flex-shrink: 0;
+  padding-right: 12px;
+  color: var(--lime-700);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: pre;
+}
+
+.action {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding-inline: 8px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--lime-700);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}

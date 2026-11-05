@@ -1,0 +1,33 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden; /* 스크롤은 AppShell 안쪽에서만 일어납니다 */
+  background: var(--outside-app);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  word-break: keep-all;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--lime-700);
+  outline-offset: 2px;
+}

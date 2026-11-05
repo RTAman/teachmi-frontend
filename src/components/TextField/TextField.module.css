@@ -1,0 +1,87 @@
+.field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 7px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.required {
+  color: var(--bad);
+}
+
+.box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-inline: 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-input);
+  background: var(--surface);
+}
+
+.box:focus-within {
+  border-color: var(--lime-700);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.invalid,
+.invalid:focus-within {
+  border-color: var(--bad);
+}
+
+.invalid:focus-within {
+  box-shadow: 0 0 0 3px var(--bad-bg);
+}
+
+.control {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  font-size: 15px;
+}
+
+/* iOS는 입력칸 글자가 16px보다 작으면 터치할 때 화면을 확대합니다 */
+@media (pointer: coarse) {
+  .control {
+    font-size: 16px;
+  }
+}
+
+.multiline {
+  height: auto;
+  min-height: 90px;
+  padding-block: 11px;
+  line-height: 22px;
+  resize: none;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.control::placeholder {
+  color: var(--placeholder);
+  opacity: 1;
+}
+
+.unit {
+  color: var(--sub);
+  font-size: 15px;
+}
+
+.hint {
+  margin: 0;
+  color: var(--sub);
+  font-size: 12px;
+  line-height: 18px;
+}
