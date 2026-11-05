@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
 import ComponentPreview from './pages/ComponentPreview';
 import HomePage from './pages/Home/HomePage';
+import ChatPage from './pages/Learn/ChatPage';
 import ModePage from './pages/Learn/ModePage';
 import SummaryPage from './pages/Learn/SummaryPage';
 import LoginFormPage from './pages/Login/LoginFormPage';
@@ -22,7 +23,8 @@ export default function App() {
         <Route path="/learn" element={<MaterialPage />} />
         <Route path="/learn/mode" element={<ModePage />} />
         <Route path="/learn/summary" element={<SummaryPage />} />
-        <Route path="/learn/chat" element={<PlaceholderPage title="AI 학생 대화" showNav={false} />} />
+        <Route path="/learn/chat" element={<ChatPage />} />
+        <Route path="/learn/problem" element={<PlaceholderPage title="응용문제" showNav={false} />} />
         <Route path="/records" element={<PlaceholderPage title="학습 기록" />} />
         <Route path="/reports" element={<PlaceholderPage title="성장 리포트" />} />
         <Route path="/my" element={<PlaceholderPage title="마이페이지" />} />
