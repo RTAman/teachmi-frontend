@@ -1,0 +1,146 @@
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.heading {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 30px;
+}
+
+.sub {
+  margin: 2px 0 0;
+  color: var(--sub);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.latest {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 14px 18px 18px;
+  border-radius: 24px;
+  background: var(--lime-100);
+  color: inherit;
+  text-decoration: none;
+}
+
+.latest > img {
+  flex-shrink: 0;
+}
+
+.latestText {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.latestLabel {
+  color: var(--lime-700);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+}
+
+.latestText strong {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.latestMeta {
+  color: var(--sub);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.empty {
+  margin: 0;
+  padding: 24px 16px;
+  border: 1px dashed var(--line-dashed);
+  border-radius: var(--radius-card);
+  color: var(--sub);
+  font-size: 14px;
+  line-height: 21px;
+  text-align: center;
+}
+
+.sectionTitle {
+  margin: 0 0 10px;
+  color: var(--sub);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.card > img {
+  flex-shrink: 0;
+}
+
+.cardBody {
+  flex: 1;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cardTop strong {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 21px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  flex-shrink: 0;
+  color: var(--faint);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.subject {
+  color: var(--sub);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}

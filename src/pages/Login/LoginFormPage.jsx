@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { login } from '../../api/auth';
+import { useAuth } from '../../auth/authContext';
 import AppBar from '../../components/AppBar/AppBar';
 import AppShell from '../../components/AppShell/AppShell';
 import BottomCTA from '../../components/BottomCTA/BottomCTA';
@@ -21,6 +22,7 @@ function getErrorMessage(status) {
 export default function LoginFormPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { setStatus } = useAuth();
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -37,6 +39,7 @@ export default function LoginFormPage() {
     setSubmitting(true);
     try {
       await login(id.trim(), password);
+      setStatus('in');
       navigate('/home', { replace: true });
     } catch (err) {
       setError(getErrorMessage(err.status));

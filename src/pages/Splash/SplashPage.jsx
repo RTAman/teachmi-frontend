@@ -1,18 +1,26 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import brandSymbol from '../../assets/brand/brand-symbol-large.svg';
 import wordmark from '../../assets/brand/wordmark.svg';
+import { useAuth } from '../../auth/authContext';
 import styles from './SplashPage.module.css';
 
 const SPLASH_DURATION = 2000;
 
 export default function SplashPage() {
   const navigate = useNavigate();
+  const { status } = useAuth();
+  const [shown, setShown] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => navigate('/login', { replace: true }), SPLASH_DURATION);
+    const timer = setTimeout(() => setShown(true), SPLASH_DURATION);
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, []);
+
+  useEffect(() => {
+    if (!shown || status === 'checking') return;
+    navigate(status === 'in' ? '/home' : '/login', { replace: true });
+  }, [shown, status, navigate]);
 
   return (
     <div className={styles.page}>

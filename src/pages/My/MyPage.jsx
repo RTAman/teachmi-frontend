@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { getMe, logout } from '../../api/auth';
 import chevronIcon from '../../assets/icons/chevron-right.svg';
+import { useAuth } from '../../auth/authContext';
 import profileIcon from '../../assets/icons/profile.svg';
 import AppShell from '../../components/AppShell/AppShell';
 import BottomNav from '../../components/BottomNav/BottomNav';
@@ -18,6 +19,7 @@ const MENUS = [
 
 export default function MyPage() {
   const navigate = useNavigate();
+  const { setStatus } = useAuth();
   const [me, setMe] = useState({ status: 'loading' });
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [leaving, setLeaving] = useState(false);
@@ -29,19 +31,20 @@ export default function MyPage() {
       .then((data) => active && setMe({ status: data?.email ? 'done' : 'error', id: data?.email }))
       .catch((error) => {
         if (!active) return;
-        if (error.status === 401) navigate('/login', { replace: true });
+        if (error.status === 401) setStatus('out');
         else setMe({ status: 'error' });
       });
     return () => {
       active = false;
     };
-  }, [navigate]);
+  }, [setStatus]);
 
   async function handleLogout() {
     setLeaving(true);
     setLogoutFailed(false);
     try {
       await logout();
+      setStatus('out');
       navigate('/login', { replace: true });
     } catch {
       setLeaving(false);
