@@ -1,0 +1,156 @@
+.filters {
+  display: flex;
+  gap: 6px;
+  padding: 6px var(--page-gutter) 15px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.filter {
+  flex-shrink: 0;
+  height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 22px;
+  background: var(--surface);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.filterOn {
+  border-color: var(--lime-700);
+  background: var(--lime-700);
+  color: var(--surface);
+  font-weight: 600;
+}
+
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  padding-top: 2px;
+}
+
+.recommend {
+  padding: 16px;
+  border: 1px solid rgb(59 79 160 / 15%);
+  border-radius: var(--radius-card);
+  background: var(--ai-100);
+}
+
+.recommendBody {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.recommendBody img {
+  flex-shrink: 0;
+}
+
+.recommendLabel {
+  margin: 0;
+  color: var(--ai-700);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+}
+
+.recommendTitle {
+  margin: 1px 0 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 22px;
+}
+
+.recommendText {
+  margin: 4px 0 0;
+  color: var(--sub);
+  font-size: 13px;
+  line-height: 19px;
+}
+
+.start {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--lime-500);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.subject {
+  margin: 0 0 10px;
+  color: var(--sub);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.cards {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 79px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.cardActive {
+  border-color: var(--lime-700);
+}
+
+.card > img {
+  flex-shrink: 0;
+}
+
+.cardBody {
+  flex: 1;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cardTop strong {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 19px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  flex-shrink: 0;
+  color: var(--faint);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

@@ -12,6 +12,7 @@ import LoginPage from './pages/Login/LoginPage';
 import SignupPage from './pages/Login/SignupPage';
 import MaterialPage from './pages/Material/MaterialPage';
 import PlaceholderPage from './pages/PlaceholderPage';
+import RecordsPage from './pages/Records/RecordsPage';
 import SplashPage from './pages/Splash/SplashPage';
 
 export default function App() {
@@ -30,7 +31,7 @@ export default function App() {
         <Route path="/learn/problem" element={<ProblemPage />} />
         <Route path="/learn/report" element={<ReportPage />} />
         <Route path="/learn/report/detail" element={<ReportDetailPage />} />
-        <Route path="/records" element={<PlaceholderPage title="학습 기록" />} />
+        <Route path="/records" element={<RecordsPage />} />
         <Route path="/reports" element={<PlaceholderPage title="성장 리포트" />} />
         <Route path="/my" element={<PlaceholderPage title="마이페이지" />} />
         <Route path="/dev/components" element={<ComponentPreview />} />

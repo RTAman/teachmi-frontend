@@ -45,15 +45,18 @@ function StatCard({ icon, title, before, after }) {
         <span>지난</span>
         <span>이번</span>
       </p>
-      <span className={styles.delta}>{diff > 0 ? `${diff}회 줄었어요` : diff < 0 ? `${-diff}회 늘었어요` : '같아요'}</span>
+      <span className={`${styles.delta} ${diff > 0 ? '' : styles.deltaNeutral}`}>
+        {diff > 0 ? `${diff}회 줄었어요` : diff < 0 ? `${-diff}회 늘었어요` : '지난번과 같아요'}
+      </span>
     </section>
   );
 }
 
 export default function ReportPage() {
   const navigate = useNavigate();
-  const { state } = useLocation();
-  const report = SAMPLE_REPORT;
+  const { state, search } = useLocation();
+  const firstTime = new URLSearchParams(search).get('first') === '1';
+  const report = firstTime ? { ...SAMPLE_REPORT, comparedWith: null } : SAMPLE_REPORT;
   const gained = report.elements.after - report.elements.before;
 
   return (
@@ -78,31 +81,39 @@ export default function ReportPage() {
       <div className={styles.page}>
         <div>
           <h2 className={styles.heading}>이번 학습에서 이만큼 성장했어요</h2>
-          <p className={styles.sub}>같은 개념을 처음 공부한 {report.comparedWith}과 비교했어요</p>
+          <p className={styles.sub}>
+            {report.comparedWith
+              ? `같은 개념을 처음 공부한 ${report.comparedWith}과 비교했어요`
+              : '처음 배우는 개념이라 이번 대화의 흐름을 보여 줘요'}
+          </p>
         </div>
 
-        <section className={styles.highlight} aria-label="혼자 말한 핵심 요소">
-          {gained > 0 && <img src={bubbleGotIt} alt="" width="76" height="76" />}
-          <div>
-            <p className={styles.highlightLabel}>혼자 말한 핵심 요소</p>
-            <p className={styles.highlightNumbers}>
-              <span className={styles.before}>{report.elements.before}</span>
-              <span className={styles.bigArrow} aria-hidden="true">
-                →
-              </span>
-              <strong>{report.elements.after}</strong>
-              <span className={styles.unit}>개</span>
-            </p>
-            <span className={styles.highlightDelta}>
-              {gained > 0 ? `+${gained}개 늘었어요` : '이번에도 같은 만큼 설명했어요'}
-            </span>
-          </div>
-        </section>
+        {report.comparedWith && (
+          <>
+            <section className={styles.highlight} aria-label="혼자 말한 핵심 요소">
+              {gained > 0 && <img src={bubbleGotIt} alt="" width="76" height="76" />}
+              <div>
+                <p className={styles.highlightLabel}>혼자 말한 핵심 요소</p>
+                <p className={styles.highlightNumbers}>
+                  <span className={styles.before}>{report.elements.before}</span>
+                  <span className={styles.bigArrow} aria-hidden="true">
+                    →
+                  </span>
+                  <strong>{report.elements.after}</strong>
+                  <span className={styles.unit}>개</span>
+                </p>
+                <span className={styles.highlightDelta}>
+                  {gained > 0 ? `+${gained}개 늘었어요` : '이번에도 같은 만큼 설명했어요'}
+                </span>
+              </div>
+            </section>
 
-        <div className={styles.stats}>
-          <StatCard icon={hintBadge} title="힌트 사용" {...report.hints} />
-          <StatCard icon={stuckBadge} title="망설인 답변" {...report.stuck} />
-        </div>
+            <div className={styles.stats}>
+              <StatCard icon={hintBadge} title="힌트 사용" {...report.hints} />
+              <StatCard icon={stuckBadge} title="망설인 답변" {...report.stuck} />
+            </div>
+          </>
+        )}
 
         <section className={styles.flow}>
           <h3 className={styles.flowTitle}>대화 흐름</h3>

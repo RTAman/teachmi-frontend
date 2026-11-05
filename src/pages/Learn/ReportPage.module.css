@@ -321,3 +321,8 @@
   font-size: 12px;
   line-height: 18px;
 }
+
+.deltaNeutral {
+  background: var(--neutral-bg);
+  color: var(--neutral);
+}

@@ -61,7 +61,7 @@ export default function ModePage() {
           <div className={styles.conceptText}>
             <p className={styles.conceptLabel}>선택한 개념</p>
             <p className={styles.conceptName}>
-              {SAMPLE_SESSION.subject} · {conceptName}
+              {state?.subject ?? SAMPLE_SESSION.subject} · {conceptName}
             </p>
           </div>
           <button type="button" className={styles.change} onClick={() => navigate('/learn')}>
