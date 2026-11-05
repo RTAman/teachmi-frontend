@@ -1,0 +1,84 @@
+.card {
+  display: block;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.progressCard {
+  border-color: var(--lime-700);
+}
+
+.between {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.meta {
+  margin: 0;
+  color: var(--sub);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.title {
+  margin: 2px 0 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.chevron {
+  flex-shrink: 0;
+  margin-top: 10px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.resume {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 44px;
+  border-radius: var(--radius-icon-button);
+  background: var(--lime-500);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.track {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.segment {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.on {
+  background: var(--lime-500);
+}
+
+.status {
+  margin: 6px 0 0;
+  color: var(--sub);
+  font-size: 12px;
+  line-height: 16px;
+}
