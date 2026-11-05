@@ -4,15 +4,17 @@ import LoginFormPage from './pages/Login/LoginFormPage';
 import LoginPage from './pages/Login/LoginPage';
 import SignupPage from './pages/Login/SignupPage';
 import PlaceholderPage from './pages/PlaceholderPage';
+import SplashPage from './pages/Splash/SplashPage';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<SplashPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/login/id" element={<LoginFormPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route path="/" element={<PlaceholderPage title="홈" />} />
+        <Route path="/home" element={<PlaceholderPage title="홈" />} />
         <Route path="/learn" element={<PlaceholderPage title="학습하기" showNav={false} />} />
         <Route path="/records" element={<PlaceholderPage title="학습 기록" />} />
         <Route path="/reports" element={<PlaceholderPage title="성장 리포트" />} />
