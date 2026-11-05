@@ -1,4 +1,8 @@
 .button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   width: 100%;
   padding: 8px 16px;
   border: 1px solid transparent;
@@ -25,6 +29,11 @@
 .secondary {
   border-color: var(--line-strong);
   background: var(--surface);
+}
+
+.kakao {
+  background: var(--kakao);
+  color: var(--kakao-ink);
 }
 
 .button:active:not(:disabled) {

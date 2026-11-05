@@ -17,7 +17,6 @@ import Toast from '../components/Toast/Toast';
 const headingStyle = { margin: '0 0 12px', fontSize: 13, fontWeight: 700 };
 const stackStyle = { display: 'grid', gap: 10 };
 
-// 공통 컴포넌트를 확인하는 개발용 화면입니다. 실제 서비스 화면이 아닙니다.
 export default function ComponentPreview() {
   const [step, setStep] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);

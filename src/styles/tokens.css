@@ -1,34 +1,25 @@
-/*
-  디자인 값을 모아 두는 파일입니다. 컴포넌트에는 색상·크기를 직접 쓰지 말고 이 변수를 사용하세요.
-  이름과 값은 Figma 디자인을 따릅니다. Figma에 없는 값은 [Figma 외]로 표시했습니다.
-*/
 :root {
-  /* 배경 */
   --ground: #f9faf7;
   --surface: #ffffff;
   --dim: rgb(20 26 38 / 50%);
-  --outside-app: #e7e9e3; /* [Figma 외] PC에서 앱 바깥 배경 */
+  --outside-app: #e7e9e3;
 
-  /* 글자 */
   --ink: #1a1d16;
   --sub: #4f5549;
   --faint: #6b7165;
   --placeholder: #757575;
 
-  /* 선 */
   --line: #e7e9e3;
   --line-strong: #cdd1c7;
   --line-dashed: #9aa3b2;
 
-  /* 브랜드 (라임) */
   --lime-50: #eef8df;
   --lime-100: #e9f6d3;
   --lime-500: #8fd14f;
   --lime-700: #3f6614;
-  --accent-point: #ffb938; /* 진행 막대. 수정된 디자인 이미지에서 측정한 값 */
+  --accent-point: #ffb938;
   --focus-ring: rgb(216 240 180 / 71%);
 
-  /* 의미 색 (Tag 등) */
   --ok: #1c7a50;
   --ok-bg: #e5f6ee;
   --ai-100: #eceffb;
@@ -40,17 +31,17 @@
   --neutral: #3d4236;
   --neutral-bg: #eef0ea;
 
-  /* 폰트 */
+  --kakao: #fee500;
+  --kakao-ink: #191919;
+
   --font-sans: 'IBM Plex Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
     'Malgun Gothic', sans-serif;
   --font-mono: 'IBM Plex Mono', 'IBM Plex Sans KR', Consolas, monospace;
 
-  /* 레이아웃 */
   --app-width: 390px;
   --page-gutter: 20px;
   --card-gap: 12px;
 
-  /* 라디우스 */
   --radius-tag: 6px;
   --radius-icon-button: 12px;
   --radius-input: 12px;

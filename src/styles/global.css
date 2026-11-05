@@ -12,7 +12,7 @@ body,
 
 body {
   margin: 0;
-  overflow: hidden; /* 스크롤은 AppShell 안쪽에서만 일어납니다 */
+  overflow: hidden;
   background: var(--outside-app);
   color: var(--ink);
   font-family: var(--font-sans);

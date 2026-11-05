@@ -1,7 +1,5 @@
 import { useEffect } from 'react';
 
-// 모바일 키보드가 화면을 가리는 높이를 CSS 변수 --keyboard-inset에 저장합니다.
-// 하단 버튼과 바텀시트가 이 값만큼 위로 올라갑니다.
 export default function useKeyboardInset() {
   useEffect(() => {
     const viewport = window.visualViewport;
