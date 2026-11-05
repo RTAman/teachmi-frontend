@@ -18,7 +18,6 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
     rules: {
-      // JSX에서 쓰는 컴포넌트(대문자로 시작)를 미사용 변수로 잘못 잡지 않게 합니다.
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },

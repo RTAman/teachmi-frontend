@@ -2,10 +2,6 @@ import { useId } from 'react';
 import InlineError from '../InlineError/InlineError';
 import styles from './TextField.module.css';
 
-// 입력칸입니다. multiline을 넘기면 여러 줄 입력(TextArea)이 됩니다.
-// unit: 입력칸 오른쪽 단위(예: "원") / mono: 숫자용 고정폭 글꼴(S06 답 입력)
-// hint: 입력칸 아래 안내 문구 / error: 오류 문구 (hint보다 우선)
-// value, onChange 등 나머지 값은 입력칸에 그대로 전달됩니다.
 export default function TextField({ label, required, unit, mono, hint, error, multiline, ...rest }) {
   const id = useId();
   const messageId = `${id}-message`;

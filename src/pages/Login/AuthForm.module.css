@@ -1,0 +1,19 @@
+.form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  padding-top: 8px;
+}
+
+.switchText {
+  margin: 8px 0 0;
+  color: var(--sub);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+}
+
+.switchText a {
+  color: var(--lime-700);
+  font-weight: 600;
+}

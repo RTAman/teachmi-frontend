@@ -2,8 +2,6 @@ import styles from './StepBar.module.css';
 
 const TOTAL_STEPS = 5;
 
-// current: 현재 단계(1~5) / label: 단계 이름 (예: "자료 선택")
-// thin: 글자 없이 얇은 막대만 표시 (S05 대화 화면)
 export default function StepBar({ current, label, thin = false }) {
   const steps = Array.from({ length: TOTAL_STEPS }, (_, index) => index + 1);
 

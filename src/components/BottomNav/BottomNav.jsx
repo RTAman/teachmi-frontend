@@ -1,7 +1,6 @@
 import { NavLink } from 'react-router';
 import styles from './BottomNav.module.css';
 
-// 임시 디자인입니다. Figma에 디자인이 나오면 아이콘과 스타일을 맞춥니다.
 const TABS = [
   {
     to: '/',
@@ -50,8 +49,6 @@ const TABS = [
   },
 ];
 
-// 화면 하단 메뉴입니다. AppShell의 footer에 넣어 사용합니다.
-// 대화, 문제 풀이처럼 집중이 필요한 화면에는 넣지 않습니다.
 export default function BottomNav() {
   return (
     <nav className={styles.nav} aria-label="주요 메뉴">

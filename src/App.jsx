@@ -1,12 +1,17 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
 import ComponentPreview from './pages/ComponentPreview';
+import LoginFormPage from './pages/Login/LoginFormPage';
+import LoginPage from './pages/Login/LoginPage';
+import SignupPage from './pages/Login/SignupPage';
 import PlaceholderPage from './pages/PlaceholderPage';
 
-// 화면 주소를 정하는 곳입니다. 새 화면을 만들면 여기에 <Route>를 추가합니다.
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login/id" element={<LoginFormPage />} />
+        <Route path="/signup" element={<SignupPage />} />
         <Route path="/" element={<PlaceholderPage title="홈" />} />
         <Route path="/learn" element={<PlaceholderPage title="학습하기" showNav={false} />} />
         <Route path="/records" element={<PlaceholderPage title="학습 기록" />} />
