@@ -9,6 +9,7 @@ import dontKnowIcon from '../../assets/icons/dont-know.svg';
 import exampleIcon from '../../assets/icons/example.svg';
 import hintIcon from '../../assets/icons/hint.svg';
 import sendIcon from '../../assets/icons/send.svg';
+import AiMessage from '../../components/AiMessage/AiMessage';
 import AppBar from '../../components/AppBar/AppBar';
 import AppShell from '../../components/AppShell/AppShell';
 import BottomCTA from '../../components/BottomCTA/BottomCTA';
@@ -44,24 +45,11 @@ function withId(message) {
   return { ...message, id: `msg-${messageCount}` };
 }
 
-function AiMessage({ message }) {
+function ChatAiMessage({ message }) {
   return (
-    <li className={styles.ai}>
-      <img src={FACES[message.face]} alt="" width="32" height="32" />
-      <div className={styles.column}>
-        <p className={styles.name}>
-          AI 학생{message.label && ` · ${message.label}`}
-        </p>
-        {message.typing ? (
-          <p className={`${styles.aiBubble} ${styles.typing}`}>
-            <span className={styles.hidden}>AI 학생이 답을 쓰고 있어요</span>
-            <span aria-hidden="true">···</span>
-          </p>
-        ) : (
-          <p className={styles.aiBubble}>{message.text}</p>
-        )}
-      </div>
-    </li>
+    <AiMessage as="li" avatar={FACES[message.face]} label={message.label} typing={message.typing}>
+      {message.text}
+    </AiMessage>
   );
 }
 
@@ -201,7 +189,7 @@ export default function ChatPage() {
         <ol className={styles.messages} aria-live="polite" aria-label="AI 학생과의 대화">
           {messages.map((message) =>
             message.from === 'ai' ? (
-              <AiMessage key={message.id} message={message} />
+              <ChatAiMessage key={message.id} message={message} />
             ) : (
               <li key={message.id} className={styles.me}>
                 <span className={styles.hidden}>나: </span>
@@ -209,7 +197,7 @@ export default function ChatPage() {
               </li>
             ),
           )}
-          {busy && <AiMessage message={{ face: 'thinking', typing: true }} />}
+          {busy && <ChatAiMessage message={{ face: 'thinking', typing: true }} />}
         </ol>
         <div ref={endRef} />
       </div>

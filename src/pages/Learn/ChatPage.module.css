@@ -36,51 +36,6 @@
   list-style: none;
 }
 
-.ai {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding-right: 32px;
-}
-
-.ai > img {
-  flex-shrink: 0;
-}
-
-.column {
-  display: grid;
-  justify-items: start;
-  gap: 3px;
-  min-width: 0;
-}
-
-.name {
-  margin: 0;
-  color: var(--sub);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 18px;
-}
-
-.aiBubble {
-  margin: 0;
-  padding: 15px 14px 15px 14px;
-  border: 1px solid var(--line);
-  border-radius: 4px 16px 16px;
-  background: var(--surface);
-  font-size: 15px;
-  line-height: 23px;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-.typing {
-  min-width: 52px;
-  color: var(--sub);
-  letter-spacing: 2px;
-  text-align: center;
-}
-
 .me {
   justify-self: end;
   max-width: 278px;
