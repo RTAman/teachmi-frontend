@@ -62,7 +62,7 @@ export default function MyPage() {
             <img src={profileIcon} alt="" width="28" height="28" />
           </span>
           <div className={styles.account}>
-            <p className={styles.label}>아이디</p>
+            <p className={styles.label}>이메일</p>
             {me.status === 'loading' && <Skeleton width={120} height={14} radius={7} />}
             {me.status === 'done' && <p className={styles.id}>{me.id}</p>}
             {me.status === 'error' && <p className={styles.error}>내 정보를 불러오지 못했어요</p>}
@@ -100,7 +100,7 @@ export default function MyPage() {
           </>
         }
       >
-        다시 들어오려면 아이디로 로그인해야 해요.
+        다시 들어오려면 이메일로 로그인해야 해요.
         {logoutFailed && (
           <span className={styles.dialogError} role="alert">
             로그아웃하지 못했어요. 잠시 후 다시 시도해 주세요.

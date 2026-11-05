@@ -8,26 +8,29 @@ import Button from '../../components/Button/Button';
 import InlineError from '../../components/InlineError/InlineError';
 import TextField from '../../components/TextField/TextField';
 import styles from './AuthForm.module.css';
+import { EMAIL_ERROR, isEmail } from './email';
 
 const FORM_ID = 'signup-form';
 
 function getErrorMessage(status) {
-  if (status === 409) return '이미 사용 중인 아이디예요.';
+  if (status === 409) return '이미 가입된 이메일이에요.';
   if (status === 422) return '입력한 내용을 다시 확인해 주세요.';
   return '가입하지 못했어요. 잠시 후 다시 시도해 주세요.';
 }
 
 export default function SignupPage() {
   const navigate = useNavigate();
-  const [id, setId] = useState('');
+  const [email, setEmail] = useState('');
+  const [emailTouched, setEmailTouched] = useState(false);
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const passwordMismatch = passwordConfirm !== '' && password !== passwordConfirm;
+  const emailInvalid = emailTouched && email.trim() !== '' && !isEmail(email);
   const canSubmit =
-    id.trim() !== '' && password !== '' && password === passwordConfirm && !submitting;
+    isEmail(email) && password !== '' && password === passwordConfirm && !submitting;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -36,8 +39,8 @@ export default function SignupPage() {
     setError('');
     setSubmitting(true);
     try {
-      await signup(id.trim(), password);
-      navigate('/login/id', { replace: true, state: { signedUp: true } });
+      await signup(email.trim(), password);
+      navigate('/login/email', { replace: true, state: { signedUp: true } });
     } catch (err) {
       setError(getErrorMessage(err.status));
       setSubmitting(false);
@@ -46,7 +49,7 @@ export default function SignupPage() {
 
   return (
     <AppShell
-      header={<AppBar title="회원가입" onBack={() => navigate('/login/id')} />}
+      header={<AppBar title="회원가입" onBack={() => navigate('/login/email')} />}
       footer={
         <BottomCTA>
           <Button type="submit" form={FORM_ID} disabled={!canSubmit}>
@@ -57,12 +60,16 @@ export default function SignupPage() {
     >
       <form id={FORM_ID} className={styles.form} onSubmit={handleSubmit}>
         <TextField
-          label="아이디"
+          label="이메일"
           required
-          autoComplete="username"
-          placeholder="아이디를 입력해 주세요"
-          value={id}
-          onChange={(event) => setId(event.target.value)}
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          placeholder="example@email.com"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          onBlur={() => setEmailTouched(true)}
+          error={emailInvalid ? EMAIL_ERROR : undefined}
         />
         <TextField
           label="비밀번호"
@@ -87,7 +94,7 @@ export default function SignupPage() {
       </form>
 
       <p className={styles.switchText}>
-        이미 계정이 있나요? <Link to="/login/id">로그인</Link>
+        이미 계정이 있나요? <Link to="/login/email">로그인</Link>
       </p>
     </AppShell>
   );

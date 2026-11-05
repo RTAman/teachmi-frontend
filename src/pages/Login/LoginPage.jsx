@@ -32,8 +32,8 @@ export default function LoginPage() {
           <img src={googleIcon} alt="" width="20" height="20" />
           Google로 계속하기
         </Button>
-        <Link className={styles.idLink} to="/login/id">
-          아이디로 시작하기
+        <Link className={styles.idLink} to="/login/email">
+          이메일로 시작하기
         </Link>
         <p className={styles.terms}>
           시작하면 TEACHMi 이용약관과 개인정보 처리방침에 동의하게 돼요.
@@ -41,7 +41,7 @@ export default function LoginPage() {
       </div>
 
       <Toast open={toastOpen} onClose={() => setToastOpen(false)}>
-        아직 준비 중이에요. 아이디로 시작해 주세요.
+        아직 준비 중이에요. 이메일로 시작해 주세요.
       </Toast>
     </div>
   );

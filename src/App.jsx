@@ -26,7 +26,7 @@ export default function App() {
           <Route path="/" element={<SplashPage />} />
           <Route element={<GuestOnly />}>
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/login/id" element={<LoginFormPage />} />
+            <Route path="/login/email" element={<LoginFormPage />} />
             <Route path="/signup" element={<SignupPage />} />
           </Route>
           <Route element={<RequireLogin />}>
