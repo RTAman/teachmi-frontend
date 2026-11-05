@@ -4,6 +4,7 @@ import HomePage from './pages/Home/HomePage';
 import LoginFormPage from './pages/Login/LoginFormPage';
 import LoginPage from './pages/Login/LoginPage';
 import SignupPage from './pages/Login/SignupPage';
+import MaterialPage from './pages/Material/MaterialPage';
 import PlaceholderPage from './pages/PlaceholderPage';
 import SplashPage from './pages/Splash/SplashPage';
 
@@ -16,7 +17,8 @@ export default function App() {
         <Route path="/login/id" element={<LoginFormPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/home" element={<HomePage />} />
-        <Route path="/learn" element={<PlaceholderPage title="학습하기" showNav={false} />} />
+        <Route path="/learn" element={<MaterialPage />} />
+        <Route path="/learn/mode" element={<PlaceholderPage title="학습 방식 선택" showNav={false} />} />
         <Route path="/records" element={<PlaceholderPage title="학습 기록" />} />
         <Route path="/reports" element={<PlaceholderPage title="성장 리포트" />} />
         <Route path="/my" element={<PlaceholderPage title="마이페이지" />} />

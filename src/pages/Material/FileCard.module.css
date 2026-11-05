@@ -1,0 +1,89 @@
+.card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 70px;
+  padding: 12px 9px 12px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-option);
+  background: var(--surface);
+}
+
+.compact {
+  min-height: 54px;
+  padding: 10px 14px;
+}
+
+.ext {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--lime-50);
+  color: var(--lime-700);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.compact .ext {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 10px;
+}
+
+.compact .name {
+  font-size: 13px;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.name,
+.meta,
+.failed {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.meta,
+.failed {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.meta {
+  color: var(--sub);
+}
+
+.failed {
+  color: var(--bad);
+  font-weight: 600;
+}
+
+.remove {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-icon-button);
+  background: none;
+  cursor: pointer;
+}

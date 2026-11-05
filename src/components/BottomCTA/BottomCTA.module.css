@@ -3,3 +3,8 @@
   border-top: 1px solid var(--line);
   background: var(--surface);
 }
+
+.stack {
+  display: grid;
+  gap: 8px;
+}
