@@ -256,12 +256,7 @@
 }
 
 .failIcon {
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 26px;
-  background: var(--lime-50);
+  display: block;
 }
 
 .failTitle {
@@ -296,15 +291,22 @@
   display: grid;
   gap: 10px;
   margin: 10px 0 0;
-  padding-left: 18px;
+  padding: 0;
+  list-style: none;
   font-size: 14px;
   line-height: 21px;
 }
 
-.tips li::marker {
+.tips li {
+  display: flex;
+  gap: 9px;
+}
+
+.tips li span {
+  flex-shrink: 0;
+  width: 9px;
   color: var(--lime-700);
-  font-family: var(--font-mono);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .conceptStack {
@@ -363,15 +365,15 @@
   width: 20px;
   height: 20px;
   margin: 1px 0 0;
-  border: 1.5px solid var(--line-strong);
+  border: 1.5px solid var(--faint);
   border-radius: 50%;
   background: var(--surface);
   cursor: pointer;
 }
 
 .radio:checked {
-  border: 2px solid var(--lime-700);
-  background: radial-gradient(circle, var(--lime-700) 0 4px, var(--surface) 4.5px);
+  border-color: var(--lime-700);
+  background: radial-gradient(circle, var(--surface) 0 3.5px, var(--lime-700) 4px);
 }
 
 .optionText {
@@ -422,6 +424,7 @@
   border: 0;
   border-radius: 10px;
   background: none;
+  color: var(--lime-700);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -437,6 +440,7 @@
   border: 1px dashed var(--line-dashed);
   border-radius: var(--radius-option);
   background: none;
+  color: var(--lime-700);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;

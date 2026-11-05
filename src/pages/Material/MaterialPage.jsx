@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import bubbleThinking from '../../assets/characters/bubble-thinking.svg';
+import alertIcon from '../../assets/icons/alert.svg';
 import checkIcon from '../../assets/icons/check-ok.svg';
+import editLimeIcon from '../../assets/icons/edit-lime.svg';
 import editIcon from '../../assets/icons/edit.svg';
 import infoIcon from '../../assets/icons/info.svg';
-import plusIcon from '../../assets/icons/plus.svg';
+import plusLimeIcon from '../../assets/icons/plus-lime.svg';
 import uploadIcon from '../../assets/icons/upload.svg';
 import AppBar from '../../components/AppBar/AppBar';
 import AppShell from '../../components/AppShell/AppShell';
@@ -265,16 +267,18 @@ export default function MaterialPage() {
       <div className={styles.stack}>
         <FileCard name={file.name} meta="분석 실패" failed onRemove={reset} removeLabel="파일 지우기" />
         <section className={`${styles.card} ${styles.failCard}`}>
-          <span className={styles.failIcon}>
-            <img src={infoIcon} alt="" width="26" height="26" />
-          </span>
+          <img className={styles.failIcon} src={alertIcon} alt="" width="52" height="52" />
           <h2 className={styles.failTitle}>자료에서 글자를 읽지 못했어요</h2>
           <p className={styles.failText}>스캔한 이미지로 된 PDF이거나 파일이 손상됐을 수 있어요.</p>
           <div className={styles.tips}>
             <p className={styles.tipsTitle}>이렇게 해 보세요</p>
             <ol>
-              <li>글자를 선택할 수 있는 PDF로 다시 저장해서 올리기</li>
-              <li>공부할 내용을 복사해서 직접 붙여 넣기</li>
+              <li>
+                <span>1</span>글자를 선택할 수 있는 PDF로 다시 저장해서 올리기
+              </li>
+              <li>
+                <span>2</span>공부할 내용을 복사해서 직접 붙여 넣기
+              </li>
             </ol>
           </div>
         </section>
@@ -325,7 +329,7 @@ export default function MaterialPage() {
                 </label>
                 {selected && (
                   <button type="button" className={styles.editButton} onClick={() => setSheet({ mode: 'edit', concept })}>
-                    <img src={editIcon} alt="" width="18" height="18" />
+                    <img src={editLimeIcon} alt="" width="18" height="18" />
                     이름·범위 수정
                   </button>
                 )}
@@ -334,7 +338,7 @@ export default function MaterialPage() {
           })}
         </fieldset>
         <button type="button" className={styles.addButton} onClick={() => setSheet({ mode: 'add' })}>
-          <img src={plusIcon} alt="" width="20" height="20" />
+          <img src={plusLimeIcon} alt="" width="20" height="20" />
           목록에 없는 개념 직접 입력
         </button>
       </div>

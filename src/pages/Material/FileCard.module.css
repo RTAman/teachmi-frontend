@@ -37,6 +37,7 @@
 
 .compact .name {
   font-size: 13px;
+  font-weight: 500;
 }
 
 .text {
@@ -72,7 +73,15 @@
 
 .failed {
   color: var(--bad);
-  font-weight: 600;
+}
+
+.failedCard {
+  border-color: rgb(194 52 58 / 35%);
+}
+
+.failedCard .ext {
+  background: var(--bad-bg);
+  color: var(--bad);
 }
 
 .remove {

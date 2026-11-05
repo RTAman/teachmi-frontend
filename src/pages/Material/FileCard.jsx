@@ -9,7 +9,7 @@ function extensionOf(name) {
 
 export default function FileCard({ name, meta, failed = false, compact = false, onRemove, removeLabel }) {
   return (
-    <div className={`${styles.card} ${compact ? styles.compact : ''}`}>
+    <div className={`${styles.card} ${compact ? styles.compact : ''} ${failed ? styles.failedCard : ''}`}>
       <span className={styles.ext} aria-hidden="true">
         {extensionOf(name)}
       </span>
