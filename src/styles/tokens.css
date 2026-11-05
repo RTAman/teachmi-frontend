@@ -50,3 +50,10 @@
   --radius-button: 20px;
   --radius-modal: 24px;
 }
+
+@media (max-width: 480px) {
+  :root {
+    --app-width: 100vw;
+    --outside-app: var(--ground);
+  }
+}
