@@ -4,6 +4,8 @@ import HomePage from './pages/Home/HomePage';
 import ChatPage from './pages/Learn/ChatPage';
 import ModePage from './pages/Learn/ModePage';
 import ProblemPage from './pages/Learn/ProblemPage';
+import ReportDetailPage from './pages/Learn/ReportDetailPage';
+import ReportPage from './pages/Learn/ReportPage';
 import SummaryPage from './pages/Learn/SummaryPage';
 import LoginFormPage from './pages/Login/LoginFormPage';
 import LoginPage from './pages/Login/LoginPage';
@@ -26,7 +28,8 @@ export default function App() {
         <Route path="/learn/summary" element={<SummaryPage />} />
         <Route path="/learn/chat" element={<ChatPage />} />
         <Route path="/learn/problem" element={<ProblemPage />} />
-        <Route path="/learn/report" element={<PlaceholderPage title="학습 결과" showNav={false} />} />
+        <Route path="/learn/report" element={<ReportPage />} />
+        <Route path="/learn/report/detail" element={<ReportDetailPage />} />
         <Route path="/records" element={<PlaceholderPage title="학습 기록" />} />
         <Route path="/reports" element={<PlaceholderPage title="성장 리포트" />} />
         <Route path="/my" element={<PlaceholderPage title="마이페이지" />} />

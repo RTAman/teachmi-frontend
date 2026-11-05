@@ -1,0 +1,323 @@
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  padding-top: 6px;
+}
+
+.heading {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 26px;
+}
+
+.sub {
+  margin: 2px 0 0;
+  color: var(--sub);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.highlight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 148px;
+  padding: 12px 20px;
+  border-radius: 24px;
+  background: var(--lime-100);
+}
+
+.highlight > img {
+  flex-shrink: 0;
+}
+
+.highlightLabel {
+  margin: 0;
+  color: var(--sub);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.highlightNumbers {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+  line-height: 56px;
+}
+
+.before {
+  color: var(--faint);
+  font-size: 40px;
+  font-weight: 700;
+}
+
+.bigArrow {
+  color: var(--ink);
+  font-size: 26px;
+}
+
+.highlightNumbers strong {
+  padding-inline: 4px;
+  background: linear-gradient(transparent 62%, rgb(255 185 56 / 45%) 62%);
+  font-size: 48px;
+  font-weight: 700;
+}
+
+.unit {
+  margin-left: -6px;
+  padding-right: 4px;
+  background: linear-gradient(transparent 30%, rgb(255 185 56 / 45%) 30%);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 22px;
+}
+
+.highlightDelta {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--lime-700);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.statTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.statNumbers {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 6px 0 0;
+  line-height: 40px;
+}
+
+.statBefore {
+  color: var(--faint);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.statArrow {
+  color: var(--faint);
+  font-size: 15px;
+}
+
+.statNumbers strong {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.statUnit {
+  margin-left: -3px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.slope {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.slopeLine {
+  stroke: var(--lime-700);
+  stroke-width: 2;
+}
+
+.slopeBefore {
+  fill: var(--line-strong);
+}
+
+.slopeAfter {
+  fill: var(--lime-500);
+  stroke: var(--lime-700);
+  stroke-width: 2;
+}
+
+.slopeLabels {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin: 2px 0 0;
+  color: var(--faint);
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.slopeLabels span:last-child {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.delta {
+  margin-top: 2px;
+  padding: 3px 8px;
+  border-radius: var(--radius-tag);
+  background: var(--ok-bg);
+  color: var(--ok);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.flow {
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.flowTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 22px;
+}
+
+.chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 24px;
+  overflow: visible;
+}
+
+.grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.axis {
+  fill: var(--faint);
+  font-size: 11px;
+}
+
+.area {
+  fill: rgb(255 185 56 / 45%);
+}
+
+.line {
+  fill: none;
+  stroke: var(--lime-700);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.dot {
+  fill: var(--surface);
+  stroke: var(--lime-700);
+  stroke-width: 2;
+}
+
+.lastDot {
+  fill: var(--lime-500);
+  stroke: var(--lime-700);
+  stroke-width: 2.5;
+}
+
+.callout {
+  fill: var(--ink);
+}
+
+.calloutText {
+  fill: var(--surface);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--sub);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.legendRing {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--lime-700);
+  border-radius: 50%;
+}
+
+.footnote {
+  margin: 0;
+  color: var(--faint);
+  font-size: 11px;
+  line-height: 17px;
+}
+
+.detail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 64px;
+  margin-top: 6px;
+  padding: 10px 14px 10px 17px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-option);
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+}
+
+.detail > span {
+  display: grid;
+  gap: 2px;
+}
+
+.detail strong {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 21px;
+}
+
+.detail > span > span {
+  color: var(--sub);
+  font-size: 12px;
+  line-height: 18px;
+}
