@@ -37,7 +37,7 @@ export default function LoginFormPage() {
     setSubmitting(true);
     try {
       await login(id.trim(), password);
-      navigate('/', { replace: true });
+      navigate('/home', { replace: true });
     } catch (err) {
       setError(getErrorMessage(err.status));
       setSubmitting(false);

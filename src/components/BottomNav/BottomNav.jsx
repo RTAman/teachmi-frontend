@@ -3,7 +3,7 @@ import styles from './BottomNav.module.css';
 
 const TABS = [
   {
-    to: '/',
+    to: '/home',
     label: '홈',
     icon: (
       <>
@@ -56,7 +56,6 @@ export default function BottomNav() {
         <NavLink
           key={tab.to}
           to={tab.to}
-          end={tab.to === '/'}
           className={({ isActive }) => `${styles.tab} ${isActive ? styles.active : ''}`}
         >
           <svg

@@ -1,0 +1,23 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: var(--app-width);
+  height: 100dvh;
+  margin-inline: auto;
+  padding-top: 17px;
+  background: var(--surface);
+}
+
+.logo {
+  margin: 22px 0 0;
+  line-height: 0;
+}
+
+.tagline {
+  margin: 28px 0 0;
+  color: var(--sub);
+  font-size: 14px;
+}
