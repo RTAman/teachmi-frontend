@@ -1,0 +1,99 @@
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.heading {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 30px;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.avatar {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 26px;
+  background: var(--lime-50);
+}
+
+.account {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.label,
+.id,
+.error {
+  margin: 0;
+}
+
+.label {
+  color: var(--sub);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.id {
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.error {
+  color: var(--sub);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.menu {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  list-style: none;
+}
+
+.menu li + li {
+  border-top: 1px solid var(--line);
+}
+
+.menu a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+  padding: 0 14px 0 16px;
+  color: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.dialogError {
+  display: block;
+  margin-top: 8px;
+  color: var(--bad);
+  font-size: 13px;
+  line-height: 19px;
+}

@@ -11,6 +11,7 @@ import LoginFormPage from './pages/Login/LoginFormPage';
 import LoginPage from './pages/Login/LoginPage';
 import SignupPage from './pages/Login/SignupPage';
 import MaterialPage from './pages/Material/MaterialPage';
+import MyPage from './pages/My/MyPage';
 import PlaceholderPage from './pages/PlaceholderPage';
 import RecordsPage from './pages/Records/RecordsPage';
 import SplashPage from './pages/Splash/SplashPage';
@@ -33,7 +34,7 @@ export default function App() {
         <Route path="/learn/report/detail" element={<ReportDetailPage />} />
         <Route path="/records" element={<RecordsPage />} />
         <Route path="/reports" element={<PlaceholderPage title="성장 리포트" />} />
-        <Route path="/my" element={<PlaceholderPage title="마이페이지" />} />
+        <Route path="/my" element={<MyPage />} />
         <Route path="/dev/components" element={<ComponentPreview />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

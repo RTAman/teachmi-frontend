@@ -7,3 +7,11 @@ export function login(id, password) {
 export function signup(id, password) {
   return request('/auth/signup', { method: 'POST', body: { email: id, password } });
 }
+
+export function getMe() {
+  return request('/auth/me');
+}
+
+export function logout() {
+  return request('/auth/logout', { method: 'POST' });
+}
