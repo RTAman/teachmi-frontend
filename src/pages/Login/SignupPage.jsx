@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { signup } from '../../api/auth';
+import { messageFor } from '../../api/errors';
 import AppBar from '../../components/AppBar/AppBar';
 import AppShell from '../../components/AppShell/AppShell';
 import BottomCTA from '../../components/BottomCTA/BottomCTA';
@@ -8,14 +9,15 @@ import Button from '../../components/Button/Button';
 import InlineError from '../../components/InlineError/InlineError';
 import TextField from '../../components/TextField/TextField';
 import styles from './AuthForm.module.css';
-import { EMAIL_ERROR, isEmail } from './email';
+import { EMAIL_ERROR, isEmail, isPassword, PASSWORD_ERROR, PASSWORD_HINT } from './email';
 
 const FORM_ID = 'signup-form';
 
-function getErrorMessage(status) {
-  if (status === 409) return '이미 가입된 이메일이에요.';
-  if (status === 422) return '입력한 내용을 다시 확인해 주세요.';
-  return '가입하지 못했어요. 잠시 후 다시 시도해 주세요.';
+function getErrorMessage(error) {
+  if (error.status === 409) return '이미 가입한 이메일이에요. 로그인해 주세요.';
+  if (error.code === 'INVALID_EMAIL' || error.code === 'INVALID_PASSWORD') return messageFor(error);
+  if (error.status === 422) return '입력한 내용을 다시 확인해 주세요.';
+  return messageFor(error, '가입하지 못했어요. 잠시 후 다시 시도해 주세요.');
 }
 
 export default function SignupPage() {
@@ -23,14 +25,15 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [emailTouched, setEmailTouched] = useState(false);
   const [password, setPassword] = useState('');
+  const [passwordTouched, setPasswordTouched] = useState(false);
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const passwordMismatch = passwordConfirm !== '' && password !== passwordConfirm;
   const emailInvalid = emailTouched && email.trim() !== '' && !isEmail(email);
-  const canSubmit =
-    isEmail(email) && password !== '' && password === passwordConfirm && !submitting;
+  const passwordInvalid = passwordTouched && password !== '' && !isPassword(password);
+  const canSubmit = isEmail(email) && isPassword(password) && password === passwordConfirm && !submitting;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -42,7 +45,7 @@ export default function SignupPage() {
       await signup(email.trim(), password);
       navigate('/login/email', { replace: true, state: { signedUp: true } });
     } catch (err) {
-      setError(getErrorMessage(err.status));
+      setError(getErrorMessage(err));
       setSubmitting(false);
     }
   };
@@ -78,7 +81,11 @@ export default function SignupPage() {
           autoComplete="new-password"
           placeholder="비밀번호를 입력해 주세요"
           value={password}
+          maxLength={64}
           onChange={(event) => setPassword(event.target.value)}
+          onBlur={() => setPasswordTouched(true)}
+          hint={PASSWORD_HINT}
+          error={passwordInvalid ? PASSWORD_ERROR : undefined}
         />
         <TextField
           label="비밀번호 확인"
@@ -87,6 +94,7 @@ export default function SignupPage() {
           autoComplete="new-password"
           placeholder="비밀번호를 한 번 더 입력해 주세요"
           value={passwordConfirm}
+          maxLength={64}
           onChange={(event) => setPasswordConfirm(event.target.value)}
           error={passwordMismatch ? '비밀번호가 일치하지 않아요.' : undefined}
         />

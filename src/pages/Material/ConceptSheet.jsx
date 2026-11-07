@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import BottomSheet from '../../components/BottomSheet/BottomSheet';
 import Button from '../../components/Button/Button';
+import InlineError from '../../components/InlineError/InlineError';
 import TextField from '../../components/TextField/TextField';
 import styles from './Material.module.css';
 
@@ -15,17 +16,26 @@ function ConceptForm({ mode, concept, onCancel, onSave }) {
   const [scope, setScope] = useState(concept?.scope ?? '');
   const [content, setContent] = useState('');
   const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const contentRequired = mode === 'direct';
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
+    if (saving) return;
     const next = {};
     if (!name.trim()) next.name = '개념 이름을 입력해 주세요.';
     if (!scope.trim()) next.scope = '학습 범위를 입력해 주세요.';
     if (contentRequired && !content.trim()) next.content = '공부할 내용을 붙여 넣어 주세요.';
     setErrors(next);
     if (Object.keys(next).length > 0) return;
-    onSave({ name: name.trim(), scope: scope.trim(), content: content.trim() });
+    setSaveError('');
+    setSaving(true);
+    const message = await onSave({ name: name.trim(), scope: scope.trim(), content: content.trim() });
+    if (message) {
+      setSaveError(message);
+      setSaving(false);
+    }
   }
 
   return (
@@ -36,7 +46,7 @@ function ConceptForm({ mode, concept, onCancel, onSave }) {
         value={name}
         onChange={(event) => setName(event.target.value)}
         error={errors.name}
-        maxLength={40}
+        maxLength={60}
       />
       <TextField
         label="학습 범위"
@@ -46,26 +56,32 @@ function ConceptForm({ mode, concept, onCancel, onSave }) {
         onChange={(event) => setScope(event.target.value)}
         error={errors.scope}
         hint="범위가 넓으면 개념 하나로 좁혀 주세요. 예) 감가상각 전체 → 정액법 계산"
-        maxLength={200}
+        maxLength={500}
       />
-      <TextField
-        label={
-          <>
-            자료 내용 붙여 넣기 <span className={styles.labelNote}>(파일 없이 진행할 때)</span>
-          </>
-        }
-        required={contentRequired}
-        multiline
-        value={content}
-        onChange={(event) => setContent(event.target.value)}
-        error={errors.content}
-        placeholder="강의 노트나 교재 내용을 붙여 넣어 주세요"
-      />
+      {mode !== 'edit' && (
+        <TextField
+          label={
+            <>
+              자료 내용 붙여 넣기 <span className={styles.labelNote}>(파일 없이 진행할 때)</span>
+            </>
+          }
+          required={contentRequired}
+          multiline
+          value={content}
+          onChange={(event) => setContent(event.target.value)}
+          error={errors.content}
+          placeholder="강의 노트나 교재 내용을 붙여 넣어 주세요"
+          maxLength={15000}
+        />
+      )}
+      {saveError && <InlineError>{saveError}</InlineError>}
       <div className={styles.sheetActions}>
-        <Button variant="secondary" onClick={onCancel}>
+        <Button variant="secondary" onClick={onCancel} disabled={saving}>
           취소
         </Button>
-        <Button type="submit">저장</Button>
+        <Button type="submit" disabled={saving}>
+          {saving ? '저장 중...' : '저장'}
+        </Button>
       </div>
     </form>
   );

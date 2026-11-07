@@ -1,5 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router';
+import { newKey } from '../../api/client';
+import { messageFor } from '../../api/errors';
+import { addConcept, createTextMaterial, getMaterial, updateConcept, uploadMaterial } from '../../api/materials';
 import bubbleThinking from '../../assets/characters/bubble-thinking.svg';
 import alertIcon from '../../assets/icons/alert.svg';
 import checkIcon from '../../assets/icons/check-ok.svg';
@@ -8,6 +11,7 @@ import editIcon from '../../assets/icons/edit.svg';
 import infoIcon from '../../assets/icons/info.svg';
 import plusLimeIcon from '../../assets/icons/plus-lime.svg';
 import uploadIcon from '../../assets/icons/upload.svg';
+import { useAuth } from '../../auth/authContext';
 import AppBar from '../../components/AppBar/AppBar';
 import AppShell from '../../components/AppShell/AppShell';
 import BottomCTA from '../../components/BottomCTA/BottomCTA';
@@ -15,6 +19,8 @@ import Button from '../../components/Button/Button';
 import InlineError from '../../components/InlineError/InlineError';
 import Skeleton from '../../components/Skeleton/Skeleton';
 import StepBar from '../../components/StepBar/StepBar';
+import ActiveSessionDialog from '../../learning/ActiveSessionDialog';
+import useStartSession from '../../learning/useStartSession';
 import ConceptSheet from './ConceptSheet';
 import FileCard from './FileCard';
 import {
@@ -29,17 +35,29 @@ import {
 import styles from './Material.module.css';
 
 const STEP_DELAY = 1200;
+const POLL_DELAY = 2000;
 const SKELETON_WIDTHS = [
   [166, 97],
   [200, 132],
   [137, 69],
 ];
 
+const FAILURES = {
+  format: { title: '지원하지 않는 파일 형식이에요', text: 'PDF, PPT, PPTX 파일만 분석할 수 있어요.' },
+  size: { title: '파일 용량이 너무 커요', text: '용량을 줄이거나 공부할 부분만 나눠서 올려 주세요.' },
+  no_text: {
+    title: '자료에서 글자를 읽지 못했어요',
+    text: '스캔한 이미지로 된 PDF이거나 파일이 손상됐을 수 있어요.',
+  },
+  analysis: { title: '자료를 분석하지 못했어요', text: '잠시 후 다시 올리거나 내용을 직접 붙여 넣어 주세요.' },
+};
+
 function formatSize(bytes) {
   return `${(bytes / 1024 / 1024).toFixed(1)}MB`;
 }
 
 function fileMeta(file) {
+  if (!file.size) return '';
   const size = formatSize(file.size);
   return file.pages ? `${size} · ${file.pages}쪽` : size;
 }
@@ -51,6 +69,10 @@ function checkFile(file) {
   return '';
 }
 
+function toConcept(view) {
+  return { id: view.conceptId, name: view.name, scope: view.scope, summary: view.scope, pages: view.location ?? '' };
+}
+
 function initialState(state) {
   if (state === 'analyzing') return { phase: 'analyzing', file: SAMPLE_FILE };
   if (state === 'failed') return { phase: 'failed', file: SAMPLE_FAILED_FILE };
@@ -58,23 +80,67 @@ function initialState(state) {
   return { phase: 'select', file: null };
 }
 
+function uploadErrorMessage(error) {
+  if (error.status === 404 || error.status === 405) return '파일 업로드는 아직 준비 중이에요. 내용을 직접 입력해 주세요.';
+  return messageFor(error, '파일을 올리지 못했어요. 잠시 후 다시 시도해 주세요.');
+}
+
 export default function MaterialPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { status } = useAuth();
+  const live = status === 'in';
   const [searchParams] = useSearchParams();
-  const demoState = searchParams.get('state');
+  const demoState = live ? null : searchParams.get('state');
   const shouldFail = searchParams.get('demo') === 'fail';
-  const [{ phase, file }, setMaterial] = useState(() => initialState(demoState));
+  const [{ phase, file }, setMaterial] = useState(() =>
+    live && location.state?.materialId ? { phase: 'loading', file: null } : initialState(demoState),
+  );
+  const [materialId, setMaterialId] = useState(location.state?.materialId ?? null);
+  const [failure, setFailure] = useState('no_text');
   const [analysisStep, setAnalysisStep] = useState(demoState === 'analyzing' ? 1 : 0);
-  const [concepts, setConcepts] = useState(SAMPLE_CONCEPTS);
+  const [concepts, setConcepts] = useState(live ? [] : SAMPLE_CONCEPTS);
   const [selectedId, setSelectedId] = useState(null);
   const [fileError, setFileError] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [sheet, setSheet] = useState(null);
   const inputRef = useRef(null);
+  const keyRef = useRef(null);
+  const starter = useStartSession();
+
+  const applyMaterial = useCallback((view) => {
+    setMaterialId(view.materialId);
+    const name = view.fileName ?? view.title ?? '내 자료';
+    if (view.status === 'done') {
+      setConcepts(view.concepts.map(toConcept));
+      setMaterial({ phase: 'concepts', file: { name, size: 0, title: view.title, direct: view.sourceType === 'text' } });
+    } else if (view.status === 'failed') {
+      setFailure(view.errorCode || 'analysis');
+      setMaterial({ phase: 'failed', file: { name, size: 0 } });
+    } else {
+      setMaterial((current) => ({ phase: 'analyzing', file: current.file ?? { name, size: 0 } }));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!live || phase !== 'loading' || !materialId) return undefined;
+    let active = true;
+    getMaterial(materialId)
+      .then((view) => active && applyMaterial(view))
+      .catch(() => active && setMaterial({ phase: 'select', file: null }));
+    return () => {
+      active = false;
+    };
+  }, [live, phase, materialId, applyMaterial]);
 
   useEffect(() => {
     if (phase !== 'analyzing' || demoState === 'analyzing') return undefined;
     const timer = setTimeout(() => {
+      if (live) {
+        if (analysisStep < ANALYSIS_STEPS.length - 1) setAnalysisStep(analysisStep + 1);
+        return;
+      }
       if (shouldFail && analysisStep === 0) {
         setMaterial((current) => ({ ...current, phase: 'failed' }));
       } else if (analysisStep < ANALYSIS_STEPS.length - 1) {
@@ -86,9 +152,23 @@ export default function MaterialPage() {
       }
     }, STEP_DELAY);
     return () => clearTimeout(timer);
-  }, [phase, analysisStep, shouldFail, demoState]);
+  }, [live, phase, analysisStep, shouldFail, demoState]);
 
-  function startAnalysis(nextFile) {
+  useEffect(() => {
+    if (!live || phase !== 'analyzing' || !materialId) return undefined;
+    let active = true;
+    const timer = setInterval(() => {
+      getMaterial(materialId)
+        .then((view) => active && view.status !== 'analyzing' && applyMaterial(view))
+        .catch(() => {});
+    }, POLL_DELAY);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, [live, phase, materialId, applyMaterial]);
+
+  async function startAnalysis(nextFile) {
     const error = checkFile(nextFile);
     setFileError(error);
     if (error) {
@@ -96,12 +176,29 @@ export default function MaterialPage() {
       return;
     }
     setAnalysisStep(0);
-    setMaterial({ phase: 'analyzing', file: { name: nextFile.name, size: nextFile.size } });
+    if (!live) {
+      setMaterial({ phase: 'analyzing', file: { name: nextFile.name, size: nextFile.size } });
+      return;
+    }
+    setUploading(true);
+    try {
+      const created = await uploadMaterial(nextFile, newKey());
+      setMaterialId(created.materialId);
+      setMaterial({ phase: 'analyzing', file: { name: nextFile.name, size: nextFile.size } });
+      if (created.status && created.status !== 'analyzing') applyMaterial(created);
+    } catch (err) {
+      setFileError(uploadErrorMessage(err));
+      setMaterial({ phase: 'select', file: null });
+    } finally {
+      setUploading(false);
+    }
   }
 
   function reset() {
     setFileError('');
     setAnalysisStep(0);
+    setMaterialId(null);
+    setSelectedId(null);
     setMaterial({ phase: 'select', file: null });
   }
 
@@ -123,45 +220,103 @@ export default function MaterialPage() {
   }
 
   function handleBack() {
-    if (phase === 'select') navigate('/home');
+    if (phase === 'select' || phase === 'loading') navigate('/home');
     else reset();
   }
 
-  function handleSave({ name, scope }) {
+  async function saveLive({ name, scope, content }) {
+    if (sheet.mode === 'edit') {
+      const changes = {};
+      if (name !== sheet.concept.name) changes.name = name;
+      if (scope !== sheet.concept.scope) changes.scope = scope;
+      if (Object.keys(changes).length > 0) {
+        const updated = await updateConcept(materialId, sheet.concept.id, changes);
+        setConcepts((list) => list.map((item) => (item.id === updated.conceptId ? toConcept(updated) : item)));
+      }
+      return;
+    }
+    if (!keyRef.current) keyRef.current = newKey();
+    if (sheet.mode === 'add') {
+      const added = await addConcept(materialId, { name, scope, evidenceText: content }, keyRef.current);
+      keyRef.current = null;
+      setConcepts((list) => [toConcept(added), ...list]);
+      setSelectedId(added.conceptId);
+      return;
+    }
+    const material = await createTextMaterial({ text: content, concept: { name, scope } }, keyRef.current);
+    keyRef.current = null;
+    setSheet(null);
+    const [concept] = material.concepts;
+    await starter.start({ materialId: material.materialId, conceptId: concept.conceptId, subject: material.title });
+    return 'skip-close';
+  }
+
+  async function handleSave(values) {
+    if (!live) {
+      saveDemo(values);
+      return '';
+    }
+    try {
+      const result = await saveLive(values);
+      if (result !== 'skip-close') setSheet(null);
+      return '';
+    } catch (err) {
+      if (err.status !== 0) keyRef.current = null;
+      return messageFor(err, '저장하지 못했어요. 잠시 후 다시 시도해 주세요.');
+    }
+  }
+
+  function saveDemo({ name, scope }) {
     if (sheet.mode === 'edit') {
       setConcepts((list) =>
         list.map((item) => (item.id === sheet.concept.id ? { ...item, name, scope, summary: scope } : item)),
       );
-    } else {
-      const id = `custom-${Date.now()}`;
-      const added = { id, name, scope, summary: scope, pages: '' };
-      if (sheet.mode === 'direct') {
-        setConcepts([added]);
-        setMaterial({ phase: 'concepts', file: { name: '직접 입력한 내용.txt', size: 0 } });
-      } else {
-        setConcepts((list) => [...list, added]);
-      }
-      setSelectedId(id);
+      setSheet(null);
+      return;
     }
+    const id = `custom-${Date.now()}`;
+    const added = { id, name, scope, summary: scope, pages: '' };
     setSheet(null);
+    if (sheet.mode === 'direct') {
+      navigate('/learn/mode', { state: { concept: added } });
+      return;
+    }
+    setConcepts((list) => [added, ...list]);
+    setSelectedId(id);
   }
 
   function handleContinue() {
     const concept = concepts.find((item) => item.id === selectedId);
-    navigate('/learn/mode', { state: { concept } });
+    if (!live) {
+      navigate('/learn/mode', { state: { concept } });
+      return;
+    }
+    starter.start({ materialId, conceptId: concept.id, subject: file?.title });
   }
 
   const selectedConcept = concepts.find((item) => item.id === selectedId);
-  const isDirect = file?.size === 0;
+  const isDirect = Boolean(file?.direct);
+  const failureText = FAILURES[failure] ?? FAILURES.analysis;
 
   let content;
   let footer = (
     <BottomCTA>
-      <Button disabled={!selectedConcept} onClick={handleContinue}>
-        선택한 개념으로 계속하기
+      <Button disabled={!selectedConcept || starter.starting} onClick={handleContinue}>
+        {starter.starting ? '학습을 준비하고 있어요...' : '선택한 개념으로 계속하기'}
       </Button>
     </BottomCTA>
   );
+
+  if (phase === 'loading') {
+    content = (
+      <div className={styles.stack} aria-label="자료를 불러오는 중">
+        <Skeleton height={54} radius={16} />
+        <Skeleton width="70%" height={24} radius={6} />
+        <Skeleton height={76} radius={16} />
+        <Skeleton height={76} radius={16} />
+      </div>
+    );
+  }
 
   if (phase === 'select') {
     content = (
@@ -175,6 +330,7 @@ export default function MaterialPage() {
             type="button"
             className={`${styles.drop} ${dragging ? styles.dragging : ''}`}
             onClick={openFilePicker}
+            disabled={uploading}
             onDragOver={(event) => {
               event.preventDefault();
               setDragging(true);
@@ -186,7 +342,7 @@ export default function MaterialPage() {
             <span className={styles.dropIcon}>
               <img src={uploadIcon} alt="" width="26" height="26" />
             </span>
-            <span className={styles.dropTitle}>파일 선택하기</span>
+            <span className={styles.dropTitle}>{uploading ? '파일을 올리고 있어요' : '파일 선택하기'}</span>
             <span className={styles.dropHint}>PDF · PPT · PPTX · 최대 {MAX_FILE_MB}MB</span>
             <span className={styles.dropPill}>내 파일에서 찾기</span>
           </button>
@@ -201,6 +357,7 @@ export default function MaterialPage() {
           <img src={editIcon} alt="" width="18" height="18" />
           파일 없이 직접 입력하기
         </Button>
+        {starter.error && <InlineError>{starter.error}</InlineError>}
         <div className={styles.info}>
           <img src={infoIcon} alt="" width="20" height="20" />
           <p>한 번의 학습은 개념 하나만 다뤄요. 자료가 길어도 그중 하나를 고르게 돼요.</p>
@@ -234,13 +391,13 @@ export default function MaterialPage() {
           </div>
           <ol className={styles.checks}>
             {ANALYSIS_STEPS.map((step, index) => {
-              const status = index < analysisStep ? 'done' : index === analysisStep ? 'current' : 'todo';
+              const stepStatus = index < analysisStep ? 'done' : index === analysisStep ? 'current' : 'todo';
               return (
-                <li key={step.todo} className={styles[status]}>
+                <li key={step.todo} className={styles[stepStatus]}>
                   <span className={styles.dot}>
-                    {status === 'done' && <img src={checkIcon} alt="" width="14" height="14" />}
+                    {stepStatus === 'done' && <img src={checkIcon} alt="" width="14" height="14" />}
                   </span>
-                  {step[status]}
+                  {step[stepStatus]}
                 </li>
               );
             })}
@@ -268,8 +425,8 @@ export default function MaterialPage() {
         <FileCard name={file.name} meta="분석 실패" failed onRemove={reset} removeLabel="파일 지우기" />
         <section className={`${styles.card} ${styles.failCard}`}>
           <img className={styles.failIcon} src={alertIcon} alt="" width="52" height="52" />
-          <h2 className={styles.failTitle}>자료에서 글자를 읽지 못했어요</h2>
-          <p className={styles.failText}>스캔한 이미지로 된 PDF이거나 파일이 손상됐을 수 있어요.</p>
+          <h2 className={styles.failTitle}>{failureText.title}</h2>
+          <p className={styles.failText}>{failureText.text}</p>
           <div className={styles.tips}>
             <p className={styles.tipsTitle}>이렇게 해 보세요</p>
             <ol>
@@ -295,13 +452,14 @@ export default function MaterialPage() {
   }
 
   if (phase === 'concepts') {
+    const subject = file?.title ?? (live ? '' : SAMPLE_SUBJECT);
     content = (
       <div className={styles.conceptStack}>
         <FileCard name={isDirect ? '직접 입력한 내용' : file.name} compact />
         <div className={styles.conceptIntro}>
           <h2 className={styles.conceptHeading}>설명할 개념을 하나 골라 주세요</h2>
           <p className={styles.subheading}>
-            {isDirect ? '입력한 개념으로 학습해요' : `자료에서 개념 ${concepts.length}개를 찾았어요 · ${SAMPLE_SUBJECT}`}
+            자료에서 개념 {concepts.length}개를 찾았어요{subject ? ` · ${subject}` : ''}
           </p>
         </div>
         <fieldset className={styles.options}>
@@ -341,6 +499,7 @@ export default function MaterialPage() {
           <img src={plusLimeIcon} alt="" width="20" height="20" />
           목록에 없는 개념 직접 입력
         </button>
+        {starter.error && <InlineError>{starter.error}</InlineError>}
       </div>
     );
   }
@@ -367,6 +526,13 @@ export default function MaterialPage() {
         aria-hidden="true"
       />
       <ConceptSheet mode={sheet?.mode} concept={sheet?.concept} onClose={() => setSheet(null)} onSave={handleSave} />
+      <ActiveSessionDialog
+        conflict={starter.conflict}
+        starting={starter.starting}
+        onReplace={starter.replace}
+        onResume={starter.resume}
+        onClose={starter.dismiss}
+      />
     </AppShell>
   );
 }

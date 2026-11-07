@@ -14,9 +14,10 @@ import { EMAIL_ERROR, isEmail } from './email';
 
 const FORM_ID = 'login-form';
 
-function getErrorMessage(status) {
-  if (status === 401) return '이메일 또는 비밀번호가 맞지 않아요.';
-  if (status === 429) return '로그인 시도가 너무 많아요. 잠시 후 다시 시도해 주세요.';
+function getErrorMessage(error) {
+  if (error.status === 401) return '이메일 또는 비밀번호가 올바르지 않아요.';
+  if (error.status === 429) return '로그인 시도가 너무 많아요. 잠시 후 다시 시도해 주세요.';
+  if (error.status === 0) return '로그인하지 못했어요. 인터넷 연결을 확인해 주세요.';
   return '로그인하지 못했어요. 잠시 후 다시 시도해 주세요.';
 }
 
@@ -45,7 +46,7 @@ export default function LoginFormPage() {
       setStatus('in');
       navigate('/home', { replace: true });
     } catch (err) {
-      setError(getErrorMessage(err.status));
+      setError(getErrorMessage(err));
       setSubmitting(false);
     }
   };

@@ -1,0 +1,13 @@
+.loading {
+  display: grid;
+  gap: 14px;
+  padding-top: 8px;
+}
+
+.error {
+  margin: 24px 0 0;
+  color: var(--sub);
+  font-size: 14px;
+  line-height: 21px;
+  text-align: center;
+}
