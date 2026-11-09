@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { confirmReport, relearn } from '../api/assessment';
+import { confirmReport, getReport, relearn } from '../api/assessment';
 import { messageFor } from '../api/errors';
 import useLearningSession from './useLearningSession';
 import useReport from './useReport';
@@ -38,6 +38,23 @@ export function useReportActions(sessionId, report) {
   }
 
   return { busy, error, goHome, explainAgain };
+}
+
+export function usePreviousReport(sessionId) {
+  const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    if (!sessionId) return undefined;
+    let active = true;
+    getReport(sessionId)
+      .then((found) => active && setResult({ report: found }))
+      .catch(() => active && setResult({ report: null }));
+    return () => {
+      active = false;
+    };
+  }, [sessionId]);
+
+  return { previous: result?.report ?? null, waiting: Boolean(sessionId) && !result };
 }
 
 export function useLiveReport() {

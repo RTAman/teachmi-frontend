@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getHome } from '../../api/assessment';
+import formatDate from '../../learning/formatDate';
 import { STAGE_ROUTES } from '../../learning/useLearningSession';
 import { HOME_SAMPLES } from './homeSamples';
 
@@ -12,11 +13,6 @@ const STAGE_PROGRESS = {
 };
 
 const LIVE_MESSAGE = '오늘 배운 개념, 저한테 설명해 줄래요?';
-
-function formatDate(value) {
-  const date = new Date(value);
-  return `${date.getMonth() + 1}월 ${date.getDate()}일`;
-}
 
 function toReportCard(report) {
   const allSolved = report.independentCorrect === report.total;

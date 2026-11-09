@@ -34,3 +34,18 @@ export function sendTurn(sessionId, { kind, text, expectedVersion }, idempotency
   const body = kind === 'answer' ? { kind, text, expectedVersion } : { kind, expectedVersion };
   return request(`/sessions/${sessionId}/turns`, { method: 'POST', body, idempotencyKey });
 }
+
+export function finishExplanation(sessionId, expectedVersion, idempotencyKey = newKey()) {
+  return request(`/sessions/${sessionId}/explanation/finish`, {
+    method: 'POST',
+    body: { expectedVersion },
+    idempotencyKey,
+  });
+}
+
+export function sendHesitation(sessionId, targetMessageId, waitedSeconds) {
+  return request(`/sessions/${sessionId}/hesitations`, {
+    method: 'POST',
+    body: { targetMessageId, waitedSeconds },
+  });
+}

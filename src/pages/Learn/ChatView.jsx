@@ -54,8 +54,10 @@ export default function ChatView({
   done,
   onNext,
   nextLabel = '응용문제 풀러 가기',
+  nextDisabled = false,
   alert,
   locked = false,
+  onDraftingChange,
 }) {
   const navigate = useNavigate();
   const [draft, setDraft] = useState('');
@@ -68,11 +70,16 @@ export default function ChatView({
     endRef.current?.scrollIntoView({ block: 'end' });
   }, [messages, typing, alert]);
 
+  function changeDraft(text) {
+    setDraft(text);
+    onDraftingChange?.(text.trim().length > 0);
+  }
+
   function handleSubmit(event) {
     event.preventDefault();
     if (!canSend) return;
     onSend(draft.trim());
-    setDraft('');
+    changeDraft('');
   }
 
   function handleFinish() {
@@ -82,7 +89,9 @@ export default function ChatView({
 
   const footer = done ? (
     <BottomCTA>
-      <Button onClick={onNext}>{nextLabel}</Button>
+      <Button onClick={onNext} disabled={nextDisabled}>
+        {nextLabel}
+      </Button>
     </BottomCTA>
   ) : (
     <div className={styles.composer}>
@@ -108,7 +117,7 @@ export default function ChatView({
           className={styles.input}
           rows={1}
           value={draft}
-          onChange={(event) => setDraft(event.target.value)}
+          onChange={(event) => changeDraft(event.target.value)}
           placeholder={placeholder}
           aria-label="AI 학생에게 보낼 설명"
           maxLength={4000}

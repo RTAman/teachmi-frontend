@@ -2,16 +2,45 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import bubbleCurious from '../../assets/characters/bubble-curious.png';
 import chevronIcon from '../../assets/icons/chevron-right.svg';
+import { useAuth } from '../../auth/authContext';
 import AppBar from '../../components/AppBar/AppBar';
 import AppShell from '../../components/AppShell/AppShell';
 import BottomNav from '../../components/BottomNav/BottomNav';
+import SessionCard from '../../components/SessionCard/SessionCard';
+import Skeleton from '../../components/Skeleton/Skeleton';
 import Tag from '../../components/Tag/Tag';
+import useLiveHome from '../Home/useLiveHome';
 import { RECOMMENDATION, RECORDS } from './recordSamples';
 import styles from './RecordsPage.module.css';
 
 const ALL = '전체';
 
 export default function RecordsPage() {
+  const { status } = useAuth();
+  return status === 'in' ? <LiveRecords /> : <DemoRecords />;
+}
+
+function LiveRecords() {
+  const navigate = useNavigate();
+  const { home, failed } = useLiveHome(true);
+  const records = home?.sessions ?? [];
+
+  return (
+    <AppShell header={<AppBar title="나의 학습 기록" onBack={() => navigate('/home')} />} footer={<BottomNav />}>
+      <div className={styles.page}>
+        {!home && !failed && <Skeleton height={108} radius={20} />}
+        {failed && <p className={styles.notice}>학습 기록을 불러오지 못했어요.</p>}
+        {home && records.length === 0 && <p className={styles.notice}>아직 학습 기록이 없어요.</p>}
+        {records.length > 0 && <p className={styles.notice}>최근 학습만 보여 줘요</p>}
+        {records.map(({ id, ...record }) => (
+          <SessionCard key={id} {...record} />
+        ))}
+      </div>
+    </AppShell>
+  );
+}
+
+function DemoRecords() {
   const navigate = useNavigate();
   const subjects = [...new Set(RECORDS.map((record) => record.subject))];
   const [filter, setFilter] = useState(ALL);

@@ -1,5 +1,6 @@
 import { Navigate, useNavigate } from 'react-router';
 import arrowIcon from '../../assets/icons/arrow-right.svg';
+import checkIcon from '../../assets/icons/check-ok.svg';
 import infoIcon from '../../assets/icons/info.svg';
 import AppBar from '../../components/AppBar/AppBar';
 import AppShell from '../../components/AppShell/AppShell';
@@ -37,6 +38,7 @@ export default function LiveReportDetail() {
   if (!report) return <ReportLoading header={header} error={error} />;
 
   const { explanation, application, nextSteps } = report;
+  const newPoints = report.keyPoints?.items.filter((item) => item.inFinal && !item.inInitial) ?? [];
   const delivered = explanation.deliveredSupport;
   const independent = explanation.result === 'independent';
   const allSolved = application.independentCorrect === application.total;
@@ -88,6 +90,20 @@ export default function LiveReportDetail() {
             <div className={styles.final}>
               <p className={`${styles.label} ${styles.finalLabel}`}>학습 후 · 최종 설명</p>
               <p className={styles.finalQuote}>“{explanation.finalExplanation.text}”</p>
+              {newPoints.length > 0 && (
+                <>
+                  <hr />
+                  <p className={styles.label}>새로 포함된 핵심 요소</p>
+                  <ul className={styles.chips}>
+                    {newPoints.map((item) => (
+                      <li key={item.point}>
+                        <img src={checkIcon} alt="" width="13" height="13" />
+                        {item.point}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
             </div>
           )}
         </section>

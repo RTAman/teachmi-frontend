@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router';
 import { newKey } from '../../api/client';
 import { canRetrySame, isTerminal, messageFor, terminalMessage } from '../../api/errors';
-import { getSession, sendTurn } from '../../api/sessions';
+import { finishExplanation, getSession, sendTurn } from '../../api/sessions';
 import AppBar from '../../components/AppBar/AppBar';
 import SessionGate from '../../learning/SessionGate';
+import useHesitation from '../../learning/useHesitation';
 import useLearningSession, { STAGE_ROUTES } from '../../learning/useLearningSession';
 import ChatView from './ChatView';
 import {
@@ -137,7 +138,10 @@ function LiveChat({ initial, subject }) {
   const [sending, setSending] = useState(null);
   const [alert, setAlert] = useState(null);
   const [timedOut, setTimedOut] = useState(false);
+  const [finishing, setFinishing] = useState(false);
+  const [drafting, setDrafting] = useState(false);
   const lastRequestRef = useRef(null);
+  const finishKeyRef = useRef(null);
 
   const pending = session.pendingTurn;
   const terminal = terminalMessage({ code: pending?.errorCode, recovery: session.recovery });
@@ -146,6 +150,7 @@ function LiveChat({ initial, subject }) {
   const canRetryPending = failed && !terminal && session.availableActions?.includes('retry_turn');
   const waitOnly = !terminal && !generating && !failed && session.availableActions?.includes('wait');
   const done = session.stage !== 'chat' || session.availableActions?.includes('start_problems');
+  const awaitingFinish = session.availableActions?.includes('finish_explanation');
 
   useEffect(() => {
     if (!generating || sending || timedOut) return undefined;
@@ -213,6 +218,24 @@ function LiveChat({ initial, subject }) {
     submit({ kind, text, expectedVersion: session.version, key: newKey() });
   }
 
+  async function finish() {
+    finishKeyRef.current ??= newKey();
+    setAlert(null);
+    setFinishing(true);
+    try {
+      const next = await finishExplanation(session.sessionId, session.version, finishKeyRef.current);
+      navigate('/learn/problem', { state: { session: next, subject } });
+    } catch (err) {
+      const current = err.body?.currentSession;
+      if (current) {
+        setSession(current);
+        finishKeyRef.current = null;
+      }
+      setAlert({ text: messageFor(err, '설명을 마치지 못했어요. 다시 눌러 주세요.') });
+      setFinishing(false);
+    }
+  }
+
   function handleNext() {
     if (session.stage === 'report') {
       navigate('/learn/report', { state: { session, subject } });
@@ -236,6 +259,14 @@ function LiveChat({ initial, subject }) {
   const modeLabel = session.mode === 'first' ? '처음 학습' : '복습';
   const locked = Boolean(terminal) || Boolean(alert?.locked) || waitOnly;
   const returning = Boolean(session.problemReturn) || session.availableActions?.includes('retry_problem');
+  const canAnswer = !done && !awaitingFinish && !generating && !failed && !locked && !sending;
+  const lastMessage = session.messages.at(-1);
+  const waitingOnQuestion = canAnswer && !drafting && lastMessage?.role === 'assistant' && lastMessage.kind.endsWith('_question');
+  useHesitation(session.sessionId, waitingOnQuestion ? lastMessage.messageId : null);
+
+  let nextLabel = '응용문제 풀러 가기';
+  if (returning) nextLabel = '같은 문제 다시 풀기';
+  if (awaitingFinish) nextLabel = '설명 마치기';
 
   return (
     <ChatView
@@ -243,17 +274,19 @@ function LiveChat({ initial, subject }) {
       subtitle={`${subject ? `${subject} · ` : ''}${modeLabel} · 03 개념 설명`}
       messages={toMessages(session, sending)}
       typing={Boolean(sending) || (generating && !timedOut)}
-      showChips={!done}
+      showChips={!done && !awaitingFinish}
       showFinish={false}
       onFinish={() => {}}
       onHelp={(kind) => send(kind)}
       onSend={(text) => send('answer', text)}
       placeholder={session.chatStage === 'wrapup' ? WRAP_UP_PLACEHOLDER : DEFAULT_PLACEHOLDER}
-      done={done && !sending}
-      onNext={handleNext}
-      nextLabel={returning ? '같은 문제 다시 풀기' : '응용문제 풀러 가기'}
+      done={(done || awaitingFinish) && !sending}
+      onNext={awaitingFinish ? finish : handleNext}
+      nextLabel={nextLabel}
+      nextDisabled={finishing}
       alert={shownAlert}
       locked={locked}
+      onDraftingChange={setDrafting}
     />
   );
 }
