@@ -344,3 +344,18 @@
 .solution {
   gap: 12px;
 }
+
+.solutionText {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 22px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.myAnswer strong {
+  min-width: 0;
+  margin-left: 12px;
+  text-align: right;
+  overflow-wrap: anywhere;
+}

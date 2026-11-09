@@ -1,51 +1,28 @@
-import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { getEvidence } from '../../api/sessions';
 import arrowIcon from '../../assets/icons/arrow-right.svg';
 import checkIcon from '../../assets/icons/check-ok.svg';
 import infoIcon from '../../assets/icons/info.svg';
+import { useAuth } from '../../auth/authContext';
 import AppBar from '../../components/AppBar/AppBar';
 import AppShell from '../../components/AppShell/AppShell';
 import BottomCTA from '../../components/BottomCTA/BottomCTA';
 import Button from '../../components/Button/Button';
 import StepBar from '../../components/StepBar/StepBar';
 import Tag from '../../components/Tag/Tag';
+import LiveReportDetail from './LiveReportDetail';
 import { summarizeProblems } from './reportResults';
 import { SAMPLE_PROBLEM_RECORDS, SAMPLE_REPORT } from './reportSamples';
 import styles from './ReportDetailPage.module.css';
 
-function useExplanationChange(session) {
-  const [change, setChange] = useState(null);
-
-  useEffect(() => {
-    if (!session?.sessionId) return undefined;
-    let active = true;
-    getEvidence(session.sessionId)
-      .then((evidence) => {
-        if (!active) return;
-        const learned = evidence.originalLearning?.evidence;
-        if (!learned?.initialAnswer && !learned?.finalExplanation) return;
-        setChange({
-          firstAnswer: learned.initialAnswer?.text ?? '',
-          finalExplanation: [{ text: learned.finalExplanation?.text ?? '' }],
-          hintCount: learned.support?.delivered?.hint ?? 0,
-          turnCount: session.messages?.filter((message) => message.role === 'user').length ?? 0,
-        });
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, [session]);
-
-  return change;
+export default function ReportDetailPage() {
+  const { status } = useAuth();
+  return status === 'in' ? <LiveReportDetail /> : <DemoReportDetail />;
 }
 
-export default function ReportDetailPage() {
+function DemoReportDetail() {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const change = useExplanationChange(state?.session);
-  const report = change ? { ...SAMPLE_REPORT, ...change } : SAMPLE_REPORT;
+  const report = SAMPLE_REPORT;
   const problems = summarizeProblems(state?.problems ?? SAMPLE_PROBLEM_RECORDS);
   const solvedAlone = problems.filter((problem) => problem.solvedAlone).length;
   const missed = problems.filter((problem) => problem.tone === 'bad').length;

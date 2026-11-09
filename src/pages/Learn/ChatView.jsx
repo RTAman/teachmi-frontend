@@ -53,14 +53,16 @@ export default function ChatView({
   placeholder,
   done,
   onNext,
+  nextLabel = '응용문제 풀러 가기',
   alert,
+  locked = false,
 }) {
   const navigate = useNavigate();
   const [draft, setDraft] = useState('');
   const [leaveOpen, setLeaveOpen] = useState(false);
   const endRef = useRef(null);
   const inputRef = useRef(null);
-  const canSend = draft.trim().length > 0 && !typing;
+  const canSend = draft.trim().length > 0 && !typing && !locked;
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: 'end' });
@@ -80,7 +82,7 @@ export default function ChatView({
 
   const footer = done ? (
     <BottomCTA>
-      <Button onClick={onNext}>응용문제 풀러 가기</Button>
+      <Button onClick={onNext}>{nextLabel}</Button>
     </BottomCTA>
   ) : (
     <div className={styles.composer}>
@@ -92,7 +94,7 @@ export default function ChatView({
               type="button"
               className={styles.chip}
               onClick={() => onHelp(button.kind)}
-              disabled={typing}
+              disabled={typing || locked}
             >
               <img src={button.icon} alt="" width="18" height="18" />
               {button.label}

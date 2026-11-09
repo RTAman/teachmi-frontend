@@ -5,7 +5,7 @@ import styles from './SessionCard.module.css';
 
 const TOTAL_STEPS = 5;
 
-export default function SessionCard({ meta, title, tags = [], to, inProgress }) {
+export default function SessionCard({ meta, title, tags = [], to, linkState, inProgress }) {
   if (inProgress) {
     const steps = Array.from({ length: TOTAL_STEPS }, (_, index) => index + 1);
 
@@ -41,7 +41,7 @@ export default function SessionCard({ meta, title, tags = [], to, inProgress }) 
   }
 
   return (
-    <Link className={styles.card} to={to}>
+    <Link className={styles.card} to={to} state={linkState}>
       <div className={styles.between}>
         <div>
           <p className={styles.meta}>{meta}</p>

@@ -326,3 +326,19 @@
   background: var(--neutral-bg);
   color: var(--neutral);
 }
+
+.statPlain {
+  gap: 0;
+}
+
+.statPlain .statNumbers {
+  margin-top: 8px;
+}
+
+.loadError {
+  margin: 24px 0 0;
+  color: var(--sub);
+  font-size: 14px;
+  line-height: 21px;
+  text-align: center;
+}

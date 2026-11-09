@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router';
 import { newKey } from '../../api/client';
-import { messageFor } from '../../api/errors';
+import { canRetrySame, isTerminal, messageFor, terminalMessage } from '../../api/errors';
 import { getSession, sendTurn } from '../../api/sessions';
 import AppBar from '../../components/AppBar/AppBar';
 import SessionGate from '../../learning/SessionGate';
@@ -21,6 +21,7 @@ import { SAMPLE_SESSION } from './learnSamples';
 
 const REPLY_DELAY = 1200;
 const POLL_DELAY = 2000;
+const MAX_POLLS = 30;
 const DEFAULT_PLACEHOLDER = 'AI 학생에게 설명해 주세요';
 const WRAP_UP_PLACEHOLDER = '핵심을 한두 문장으로 정리해 주세요';
 
@@ -135,15 +136,28 @@ function LiveChat({ initial, subject }) {
   const [session, setSession] = useState(initial);
   const [sending, setSending] = useState(null);
   const [alert, setAlert] = useState(null);
+  const [timedOut, setTimedOut] = useState(false);
   const lastRequestRef = useRef(null);
 
-  const generating = session.pendingTurn?.state === 'generating';
+  const pending = session.pendingTurn;
+  const terminal = terminalMessage({ code: pending?.errorCode, recovery: session.recovery });
+  const generating = pending?.state === 'generating' && !terminal;
+  const failed = pending?.state === 'failed' || pending?.state === 'interrupted';
+  const canRetryPending = failed && !terminal && session.availableActions?.includes('retry_turn');
+  const waitOnly = !terminal && !generating && !failed && session.availableActions?.includes('wait');
   const done = session.stage !== 'chat' || session.availableActions?.includes('start_problems');
 
   useEffect(() => {
-    if (!generating || sending) return undefined;
+    if (!generating || sending || timedOut) return undefined;
     let active = true;
+    let count = 0;
     const timer = setInterval(() => {
+      count += 1;
+      if (count > MAX_POLLS) {
+        clearInterval(timer);
+        if (active) setTimedOut(true);
+        return;
+      }
       getSession(session.sessionId)
         .then((next) => active && setSession(next))
         .catch(() => {});
@@ -152,7 +166,7 @@ function LiveChat({ initial, subject }) {
       active = false;
       clearInterval(timer);
     };
-  }, [generating, sending, session.sessionId]);
+  }, [generating, sending, timedOut, session.sessionId]);
 
   async function submit(request) {
     lastRequestRef.current = request;
@@ -165,12 +179,10 @@ function LiveChat({ initial, subject }) {
     } catch (err) {
       const current = err.body?.currentSession;
       if (current) setSession(current);
-      if (err.status !== 0 && !current?.pendingTurn) {
-        lastRequestRef.current = { ...request, key: newKey(), expectedVersion: current?.version ?? request.expectedVersion };
-      }
       setAlert({
-        text: messageFor(err, '보내지 못했어요. 다시 보내 주세요.'),
-        canRetry: err.code !== 'TURN_IN_PROGRESS',
+        text: messageFor(err, '보내지 못했어요.'),
+        canRetry: canRetrySame(err) && !isTerminal(err),
+        locked: isTerminal(err),
       });
     } finally {
       setSending(null);
@@ -178,8 +190,7 @@ function LiveChat({ initial, subject }) {
   }
 
   function retry() {
-    const pending = session.pendingTurn;
-    if (pending && (pending.state === 'failed' || pending.state === 'interrupted')) {
+    if (canRetryPending) {
       const saved = session.messages.find((message) => message.messageId === pending.userMessageId);
       submit({
         kind: pending.kind,
@@ -192,26 +203,46 @@ function LiveChat({ initial, subject }) {
     if (lastRequestRef.current) submit(lastRequestRef.current);
   }
 
+  function checkStatus() {
+    getSession(session.sessionId)
+      .then(setSession)
+      .catch((err) => setAlert({ text: messageFor(err, '상태를 확인하지 못했어요.') }));
+  }
+
   function send(kind, text) {
     submit({ kind, text, expectedVersion: session.version, key: newKey() });
   }
 
-  const pendingFailed =
-    !sending && !alert && (session.pendingTurn?.state === 'failed' || session.pendingTurn?.state === 'interrupted');
-  const baseAlert = pendingFailed ? { text: 'AI 학생이 답을 만들지 못했어요. 다시 보내 주세요.', canRetry: true } : alert;
-  const shownAlert = baseAlert && {
-    text: baseAlert.text,
-    actionLabel: baseAlert.canRetry ? '다시 보내기' : undefined,
-    onAction: retry,
-  };
+  function handleNext() {
+    if (session.stage === 'report') {
+      navigate('/learn/report', { state: { session, subject } });
+      return;
+    }
+    navigate('/learn/problem', { state: { session, subject } });
+  }
+
+  let shownAlert = null;
+  if (terminal) shownAlert = { text: terminal };
+  else if (generating && timedOut) {
+    shownAlert = { text: '처리가 지연되고 있어요. 저장된 내용을 확인해 주세요.', actionLabel: '상태 확인', onAction: checkStatus };
+  } else if (canRetryPending) {
+    shownAlert = { text: 'AI 학생이 답을 만들지 못했어요. 다시 보내 주세요.', actionLabel: '다시 보내기', onAction: retry };
+  } else if (waitOnly) {
+    shownAlert = { text: '진행 상태를 확인하고 있어요.', actionLabel: '상태 확인', onAction: checkStatus };
+  } else if (alert) {
+    shownAlert = { text: alert.text, actionLabel: alert.canRetry ? '다시 보내기' : undefined, onAction: retry };
+  }
+
   const modeLabel = session.mode === 'first' ? '처음 학습' : '복습';
+  const locked = Boolean(terminal) || Boolean(alert?.locked) || waitOnly;
+  const returning = Boolean(session.problemReturn) || session.availableActions?.includes('retry_problem');
 
   return (
     <ChatView
       title={session.concept.name}
       subtitle={`${subject ? `${subject} · ` : ''}${modeLabel} · 03 개념 설명`}
       messages={toMessages(session, sending)}
-      typing={Boolean(sending) || generating}
+      typing={Boolean(sending) || (generating && !timedOut)}
       showChips={!done}
       showFinish={false}
       onFinish={() => {}}
@@ -219,8 +250,10 @@ function LiveChat({ initial, subject }) {
       onSend={(text) => send('answer', text)}
       placeholder={session.chatStage === 'wrapup' ? WRAP_UP_PLACEHOLDER : DEFAULT_PLACEHOLDER}
       done={done && !sending}
-      onNext={() => navigate('/learn/problem', { state: { session, subject } })}
+      onNext={handleNext}
+      nextLabel={returning ? '같은 문제 다시 풀기' : '응용문제 풀러 가기'}
       alert={shownAlert}
+      locked={locked}
     />
   );
 }

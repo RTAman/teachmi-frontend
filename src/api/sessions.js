@@ -34,7 +34,3 @@ export function sendTurn(sessionId, { kind, text, expectedVersion }, idempotency
   const body = kind === 'answer' ? { kind, text, expectedVersion } : { kind, expectedVersion };
   return request(`/sessions/${sessionId}/turns`, { method: 'POST', body, idempotencyKey });
 }
-
-export function getEvidence(sessionId) {
-  return request(`/sessions/${sessionId}/evidence`);
-}

@@ -18,6 +18,10 @@ export function getMaterial(materialId) {
   return request(`/materials/${materialId}`);
 }
 
+export function retryMaterial(materialId, idempotencyKey) {
+  return request(`/materials/${materialId}/retry`, { method: 'POST', idempotencyKey });
+}
+
 export function addConcept(materialId, { name, scope, evidenceText }, idempotencyKey) {
   return request(`/materials/${materialId}/concepts`, {
     method: 'POST',

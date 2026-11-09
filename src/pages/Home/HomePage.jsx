@@ -4,19 +4,26 @@ import emotionCoral from '../../assets/characters/emotion-coral.png';
 import emotionMint from '../../assets/characters/emotion-mint.png';
 import emotionSunny from '../../assets/characters/emotion-sunny.png';
 import plusIcon from '../../assets/icons/plus.svg';
+import { useAuth } from '../../auth/authContext';
 import AppShell from '../../components/AppShell/AppShell';
 import BottomNav from '../../components/BottomNav/BottomNav';
 import HomeBar from '../../components/HomeBar/HomeBar';
 import SessionCard from '../../components/SessionCard/SessionCard';
+import Skeleton from '../../components/Skeleton/Skeleton';
 import StepList from '../../components/StepList/StepList';
 import StreakBadge from '../../components/StreakBadge/StreakBadge';
 import { FIRST_USE_STEPS, HOME_SAMPLES } from './homeSamples';
+import useLiveHome from './useLiveHome';
 import styles from './HomePage.module.css';
 
 export default function HomePage() {
   const [searchParams] = useSearchParams();
-  const home = HOME_SAMPLES[searchParams.get('state')] ?? HOME_SAMPLES.records;
-  const isFirstUse = home.sessions.length === 0;
+  const { status } = useAuth();
+  const live = status === 'in';
+  const liveHome = useLiveHome(live);
+  const waiting = live && !liveHome.home;
+  const home = live ? (liveHome.home ?? { ...HOME_SAMPLES.records, sessions: [] }) : (HOME_SAMPLES[searchParams.get('state')] ?? HOME_SAMPLES.records);
+  const isFirstUse = !waiting && home.sessions.length === 0;
 
   return (
     <AppShell plainHeader header={<HomeBar />} footer={<BottomNav />}>
@@ -60,6 +67,8 @@ export default function HomePage() {
               </Link>
             </div>
             <div className={styles.sessions}>
+              {waiting && !liveHome.failed && <Skeleton height={108} radius={20} />}
+              {waiting && liveHome.failed && <p className={styles.loadError}>최근 학습을 불러오지 못했어요.</p>}
               {home.sessions.map(({ id, ...session }) => (
                 <SessionCard key={id} {...session} />
               ))}

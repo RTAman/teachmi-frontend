@@ -2,7 +2,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { newKey } from '../../api/client';
 import { messageFor } from '../../api/errors';
-import { addConcept, createTextMaterial, getMaterial, updateConcept, uploadMaterial } from '../../api/materials';
+import {
+  addConcept,
+  createTextMaterial,
+  getMaterial,
+  retryMaterial,
+  updateConcept,
+  uploadMaterial,
+} from '../../api/materials';
 import bubbleThinking from '../../assets/characters/bubble-thinking.svg';
 import alertIcon from '../../assets/icons/alert.svg';
 import checkIcon from '../../assets/icons/check-ok.svg';
@@ -43,13 +50,12 @@ const SKELETON_WIDTHS = [
 ];
 
 const FAILURES = {
-  format: { title: '지원하지 않는 파일 형식이에요', text: 'PDF, PPT, PPTX 파일만 분석할 수 있어요.' },
-  size: { title: '파일 용량이 너무 커요', text: '용량을 줄이거나 공부할 부분만 나눠서 올려 주세요.' },
+  format: { title: '파일을 열 수 없어요', text: '파일이 손상됐을 수 있어요. 다른 파일을 올려 주세요.' },
   no_text: {
     title: '자료에서 글자를 읽지 못했어요',
     text: '스캔한 이미지로 된 PDF이거나 파일이 손상됐을 수 있어요.',
   },
-  analysis: { title: '자료를 분석하지 못했어요', text: '잠시 후 다시 올리거나 내용을 직접 붙여 넣어 주세요.' },
+  analysis: { title: '분석 중 문제가 생겼어요', text: '잠시 후 다시 시도하거나 다른 파일을 올려 주세요.' },
 };
 
 function formatSize(bytes) {
@@ -80,11 +86,6 @@ function initialState(state) {
   return { phase: 'select', file: null };
 }
 
-function uploadErrorMessage(error) {
-  if (error.status === 404 || error.status === 405) return '파일 업로드는 아직 준비 중이에요. 내용을 직접 입력해 주세요.';
-  return messageFor(error, '파일을 올리지 못했어요. 잠시 후 다시 시도해 주세요.');
-}
-
 export default function MaterialPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -107,6 +108,10 @@ export default function MaterialPage() {
   const [sheet, setSheet] = useState(null);
   const inputRef = useRef(null);
   const keyRef = useRef(null);
+  const uploadRef = useRef(null);
+  const retryKeyRef = useRef(null);
+  const [retrying, setRetrying] = useState(false);
+  const [retryError, setRetryError] = useState('');
   const starter = useStartSession();
 
   const applyMaterial = useCallback((view) => {
@@ -181,16 +186,37 @@ export default function MaterialPage() {
       return;
     }
     setUploading(true);
+    if (uploadRef.current?.file !== nextFile) uploadRef.current = { file: nextFile, key: newKey() };
     try {
-      const created = await uploadMaterial(nextFile, newKey());
+      const created = await uploadMaterial(nextFile, uploadRef.current.key);
+      uploadRef.current = null;
       setMaterialId(created.materialId);
       setMaterial({ phase: 'analyzing', file: { name: nextFile.name, size: nextFile.size } });
       if (created.status && created.status !== 'analyzing') applyMaterial(created);
     } catch (err) {
-      setFileError(uploadErrorMessage(err));
+      if (err.status !== 0 && err.status !== 503) uploadRef.current = null;
+      setFileError(messageFor(err, '파일을 올리지 못했어요. 잠시 후 다시 시도해 주세요.'));
       setMaterial({ phase: 'select', file: null });
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function handleRetry() {
+    setRetryError('');
+    setRetrying(true);
+    if (!retryKeyRef.current) retryKeyRef.current = newKey();
+    try {
+      const view = await retryMaterial(materialId, retryKeyRef.current);
+      retryKeyRef.current = null;
+      setAnalysisStep(0);
+      setMaterial((current) => ({ phase: 'analyzing', file: current.file }));
+      if (view?.status && view.status !== 'analyzing') applyMaterial(view);
+    } catch (err) {
+      if (err.status !== 0 && err.status !== 503) retryKeyRef.current = null;
+      setRetryError(messageFor(err, '다시 시도하지 못했어요. 잠시 후 다시 시도해 주세요.'));
+    } finally {
+      setRetrying(false);
     }
   }
 
@@ -439,13 +465,22 @@ export default function MaterialPage() {
             </ol>
           </div>
         </section>
+        {retryError && <InlineError>{retryError}</InlineError>}
       </div>
     );
+    const directButton = { label: '학습 내용 직접 입력', onClick: () => setSheet({ mode: 'direct' }) };
+    const fileButton = { label: '다른 파일 올리기', onClick: openFilePicker };
+    const retryButton = { label: retrying ? '다시 시도하는 중...' : '다시 시도', onClick: handleRetry, disabled: retrying };
+    let buttons = [directButton, fileButton];
+    if (live && failure === 'format') buttons = [fileButton, directButton];
+    if (live && failure === 'analysis') buttons = [retryButton, fileButton];
     footer = (
       <BottomCTA stacked>
-        <Button onClick={() => setSheet({ mode: 'direct' })}>학습 내용 직접 입력</Button>
-        <Button variant="secondary" onClick={openFilePicker}>
-          다른 파일 올리기
+        <Button onClick={buttons[0].onClick} disabled={buttons[0].disabled}>
+          {buttons[0].label}
+        </Button>
+        <Button variant="secondary" onClick={buttons[1].onClick}>
+          {buttons[1].label}
         </Button>
       </BottomCTA>
     );
@@ -457,9 +492,13 @@ export default function MaterialPage() {
       <div className={styles.conceptStack}>
         <FileCard name={isDirect ? '직접 입력한 내용' : file.name} compact />
         <div className={styles.conceptIntro}>
-          <h2 className={styles.conceptHeading}>설명할 개념을 하나 골라 주세요</h2>
+          <h2 className={styles.conceptHeading}>
+            {concepts.length > 0 ? '설명할 개념을 하나 골라 주세요' : '개념을 찾지 못했어요'}
+          </h2>
           <p className={styles.subheading}>
-            자료에서 개념 {concepts.length}개를 찾았어요{subject ? ` · ${subject}` : ''}
+            {concepts.length > 0
+              ? `자료에서 개념 ${concepts.length}개를 찾았어요${subject ? ` · ${subject}` : ''}`
+              : '아래 버튼으로 공부할 개념을 직접 입력해 주세요'}
           </p>
         </div>
         <fieldset className={styles.options}>

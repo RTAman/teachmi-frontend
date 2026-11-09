@@ -18,6 +18,9 @@ import Dialog from '../../components/Dialog/Dialog';
 import StepBar from '../../components/StepBar/StepBar';
 import Tag from '../../components/Tag/Tag';
 import TextField from '../../components/TextField/TextField';
+import SessionGate from '../../learning/SessionGate';
+import useLearningSession from '../../learning/useLearningSession';
+import LiveProblem from './LiveProblem';
 import { PROBLEM_GUIDE, PROBLEMS, RETEACH_REPLY } from './problemSamples';
 import styles from './ProblemPage.module.css';
 
@@ -34,6 +37,14 @@ function initialPhase(state) {
 }
 
 export default function ProblemPage() {
+  const { live, session, loadError, subject } = useLearningSession();
+
+  if (!live) return <DemoProblem />;
+  if (!session) return <SessionGate loadError={loadError} header={<AppBar title="응용문제" />} />;
+  return <LiveProblem session={session} subject={subject} />;
+}
+
+function DemoProblem() {
   const navigate = useNavigate();
   const location = useLocation();
   const demo = new URLSearchParams(location.search).get('state');

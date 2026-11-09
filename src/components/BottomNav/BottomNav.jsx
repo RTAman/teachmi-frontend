@@ -13,22 +13,22 @@ const TABS = [
     ),
   },
   {
-    to: '/learn',
-    label: '학습하기',
-    icon: (
-      <>
-        <circle cx="12" cy="12" r="8.5" />
-        <path d="M12 8v8M8 12h8" />
-      </>
-    ),
-  },
-  {
     to: '/records',
     label: '학습 기록',
     icon: (
       <>
         <circle cx="12" cy="12" r="8.5" />
         <path d="M12 7.5V12l3 2" />
+      </>
+    ),
+  },
+  {
+    to: '/learn',
+    label: '학습하기',
+    icon: (
+      <>
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M12 8v8M8 12h8" />
       </>
     ),
   },

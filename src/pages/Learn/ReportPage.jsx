@@ -3,12 +3,14 @@ import bubbleGotIt from '../../assets/characters/bubble-got-it.png';
 import chevronIcon from '../../assets/icons/chevron-right.svg';
 import hintBadge from '../../assets/icons/hint-badge.svg';
 import stuckBadge from '../../assets/icons/stuck-badge.svg';
+import { useAuth } from '../../auth/authContext';
 import AppBar from '../../components/AppBar/AppBar';
 import AppShell from '../../components/AppShell/AppShell';
 import BottomCTA from '../../components/BottomCTA/BottomCTA';
 import Button from '../../components/Button/Button';
 import StepBar from '../../components/StepBar/StepBar';
 import FlowChart from './FlowChart';
+import LiveReport from './LiveReport';
 import { SAMPLE_REPORT } from './reportSamples';
 import styles from './ReportPage.module.css';
 
@@ -53,6 +55,11 @@ function StatCard({ icon, title, before, after }) {
 }
 
 export default function ReportPage() {
+  const { status } = useAuth();
+  return status === 'in' ? <LiveReport /> : <DemoReport />;
+}
+
+function DemoReport() {
   const navigate = useNavigate();
   const { state, search } = useLocation();
   const firstTime = new URLSearchParams(search).get('first') === '1';
