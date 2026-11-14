@@ -6,6 +6,13 @@ export async function login(email, password) {
   return result;
 }
 
+export async function loginAsGuest() {
+  setCsrfToken(null);
+  const result = await request('/auth/guest', { method: 'POST' });
+  setCsrfToken(result?.csrfToken);
+  return result;
+}
+
 export function signup(email, password) {
   return request('/auth/signup', { method: 'POST', body: { email, password } });
 }

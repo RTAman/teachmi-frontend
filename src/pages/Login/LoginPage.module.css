@@ -52,12 +52,34 @@
   padding-top: 32px;
 }
 
-.idLink {
+.textLinks {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   margin-top: 10px;
+}
+
+.idLink {
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--ink);
+  font: inherit;
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;
+  cursor: pointer;
+}
+
+.idLink:disabled {
+  color: var(--faint);
+  cursor: default;
+}
+
+.divider {
+  width: 1px;
+  height: 12px;
+  background: var(--line);
 }
 
 .terms {

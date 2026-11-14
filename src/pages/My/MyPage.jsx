@@ -28,7 +28,10 @@ export default function MyPage() {
   useEffect(() => {
     let active = true;
     getMe()
-      .then((data) => active && setMe({ status: data?.email ? 'done' : 'error', id: data?.email }))
+      .then(
+        (data) =>
+          active && setMe({ status: data?.email ? 'done' : 'error', id: data?.email, guest: data?.guest === true }),
+      )
       .catch((error) => {
         if (!active) return;
         if (error.status === 401) setStatus('out');
@@ -62,9 +65,9 @@ export default function MyPage() {
             <img src={profileIcon} alt="" width="28" height="28" />
           </span>
           <div className={styles.account}>
-            <p className={styles.label}>이메일</p>
+            <p className={styles.label}>{me.guest ? '계정' : '이메일'}</p>
             {me.status === 'loading' && <Skeleton width={120} height={14} radius={7} />}
-            {me.status === 'done' && <p className={styles.id}>{me.id}</p>}
+            {me.status === 'done' && <p className={styles.id}>{me.guest ? '게스트' : me.id}</p>}
             {me.status === 'error' && <p className={styles.error}>내 정보를 불러오지 못했어요</p>}
           </div>
         </section>
@@ -100,7 +103,9 @@ export default function MyPage() {
           </>
         }
       >
-        다시 들어오려면 이메일로 로그인해야 해요.
+        {me.guest
+          ? '게스트는 로그아웃하면 지금까지의 기록을 다시 볼 수 없어요.'
+          : '다시 들어오려면 이메일로 로그인해야 해요.'}
         {logoutFailed && (
           <span className={styles.dialogError} role="alert">
             로그아웃하지 못했어요. 잠시 후 다시 시도해 주세요.
