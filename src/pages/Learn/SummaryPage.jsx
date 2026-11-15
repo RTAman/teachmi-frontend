@@ -1,7 +1,7 @@
 ﻿import { useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router';
 import { newKey } from '../../api/client';
-import { messageFor } from '../../api/errors';
+import { isTerminal } from '../../api/errors';
 import { startChat } from '../../api/sessions';
 import bubbleCurious from '../../assets/characters/bubble-curious.png';
 import arrowIcon from '../../assets/icons/arrow-right.svg';
@@ -12,6 +12,7 @@ import Button from '../../components/Button/Button';
 import InlineError from '../../components/InlineError/InlineError';
 import StepBar from '../../components/StepBar/StepBar';
 import SessionGate from '../../learning/SessionGate';
+import { generationRecovery } from '../../learning/generationRecovery';
 import useLearningSession, { STAGE_ROUTES } from '../../learning/useLearningSession';
 import { SAMPLE_SESSION, SAMPLE_SUMMARY } from './learnSamples';
 import styles from './SummaryPage.module.css';
@@ -42,10 +43,14 @@ function sampleView() {
 export default function SummaryPage() {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const { live, session, loadError, subject } = useLearningSession();
+  const { live, session, setSession, loadError, checking, refresh, subject } = useLearningSession({ verifyOnMount: true });
   const [starting, setStarting] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
   const keyRef = useRef(null);
+  const inFlight = useRef(false);
+  const recovery = generationRecovery(session, error);
+  const locked = starting || refreshing || recovery.blocked;
 
   const header = (
     <>
@@ -54,7 +59,7 @@ export default function SummaryPage() {
     </>
   );
 
-  if (live && !session) return <SessionGate loadError={loadError} header={header} />;
+  if (live && (checking || loadError || !session)) return <SessionGate loadError={loadError} header={header} />;
   if (live && session.stage !== 'summary') {
     return <Navigate to={STAGE_ROUTES[session.stage] ?? '/learn'} replace state={{ session, subject }} />;
   }
@@ -62,11 +67,13 @@ export default function SummaryPage() {
   const view = live ? toView(session, subject) : sampleView();
 
   async function handleStart() {
+    if (locked || inFlight.current) return;
     if (!live) {
       navigate('/learn/chat', { state });
       return;
     }
-    setError('');
+    inFlight.current = true;
+    setError(null);
     setStarting(true);
     if (!keyRef.current) keyRef.current = newKey();
     try {
@@ -74,15 +81,25 @@ export default function SummaryPage() {
       keyRef.current = null;
       navigate('/learn/chat', { state: { session: next, subject } });
     } catch (err) {
-      if (err.status !== 0) keyRef.current = null;
       const current = err.body?.currentSession;
+      if (current) setSession(current);
       if (current && current.stage === 'chat') {
         navigate('/learn/chat', { state: { session: current, subject } });
         return;
       }
+      setError(err);
+    } finally {
+      inFlight.current = false;
       setStarting(false);
-      setError(messageFor(err, '설명을 시작하지 못했어요. 잠시 후 다시 시도해 주세요.'));
     }
+  }
+
+  async function handleRefresh() {
+    if (refreshing || inFlight.current) return;
+    setRefreshing(true);
+    try { await refresh(); if (!isTerminal(error)) setError(null); }
+    catch (err) { if (!isTerminal(error)) setError(err); }
+    finally { setRefreshing(false); }
   }
 
   return (
@@ -90,7 +107,7 @@ export default function SummaryPage() {
       header={header}
       footer={
         <BottomCTA>
-          <Button onClick={handleStart} disabled={starting}>
+          <Button onClick={handleStart} disabled={locked}>
             {starting ? '첫 질문을 만들고 있어요...' : 'AI 학생에게 설명하러 가기'}
             {!starting && <img src={arrowIcon} alt="" width="18" height="18" />}
           </Button>
@@ -170,7 +187,10 @@ export default function SummaryPage() {
           </section>
         )}
 
-        {error && <InlineError>{error}</InlineError>}
+        {recovery.message && <InlineError>{recovery.message}</InlineError>}
+        {recovery.blocked && <Button variant="secondary" disabled={refreshing} onClick={handleRefresh}>
+          {refreshing ? '저장 상태를 확인하고 있어요...' : '저장 상태 확인'}
+        </Button>}
       </div>
     </AppShell>
   );
