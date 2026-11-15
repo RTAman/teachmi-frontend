@@ -11,27 +11,40 @@ export const STAGE_ROUTES = {
   report: '/learn/report',
 };
 
-export default function useLearningSession() {
+export default function useLearningSession({ verifyOnMount = false } = {}) {
   const { status } = useAuth();
   const live = status === 'in';
   const { state } = useLocation();
   const [session, setSession] = useState(state?.session ?? null);
   const [loadError, setLoadError] = useState(null);
+  const [verified, setVerified] = useState(false);
+  const shouldLoad = live && (verifyOnMount || !session);
 
   useEffect(() => {
-    if (!live || session) return undefined;
+    if (!shouldLoad) return undefined;
     let active = true;
     getActiveSession()
       .then((found) => {
         if (!active) return;
         if (found) setSession(found);
         else setLoadError('none');
+        setVerified(true);
       })
-      .catch((error) => active && setLoadError(error));
+      .catch((error) => {
+        if (active) { setLoadError(error); setVerified(true); }
+      });
     return () => {
       active = false;
     };
-  }, [live, session]);
+  }, [shouldLoad]);
 
-  return { live, session, setSession, loadError, subject: state?.subject };
+  async function refresh() {
+    const found = await getActiveSession();
+    setSession(found);
+    setLoadError(found ? null : 'none');
+    return found;
+  }
+
+  return { live, session, setSession, loadError, refresh,
+    checking: live && verifyOnMount && !verified, subject: state?.subject };
 }

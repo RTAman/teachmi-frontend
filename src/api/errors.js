@@ -1,5 +1,5 @@
-const REVIEW_MESSAGE = '생성 결과 확인이 필요해요. 입력한 답변은 저장돼 있어요. 다시 요청하지 말고 지원 담당자에게 문의해 주세요.';
-const LIMIT_MESSAGE = '이 답변의 생성 시도 한도에 도달했어요. 저장된 답변을 확인하고 지원 담당자에게 문의해 주세요.';
+const REVIEW_MESSAGE = 'AI 생성 결과 확인이 필요해요. 다시 요청하지 말고 지원 담당자에게 문의해 주세요.';
+const LIMIT_MESSAGE = '이 작업의 생성 시도 한도에 도달했어요. 다시 요청하지 말고 지원 담당자에게 문의해 주세요.';
 const CONFIG_MESSAGE = 'AI 설정을 확인해야 해요. 지원 담당자에게 문의해 주세요.';
 
 const CODE_MESSAGES = {
@@ -48,14 +48,16 @@ export function isTerminal(error) {
 }
 
 export function canRetrySame(error) {
+  if (isTerminal(error) || error?.body?.recovery?.retryAllowed === false) return false;
   return error?.status === 0 || error?.body?.recovery?.retryAllowed === true;
 }
 
 export function messageFor(error, fallback = '잠시 후 다시 시도해 주세요.') {
-  return (
+  const message = (
     terminalMessage({ code: error?.code, recovery: error?.body?.recovery }) ||
     CODE_MESSAGES[error?.code] ||
     STATUS_MESSAGES[error?.status] ||
     fallback
   );
+  return isTerminal(error) && error?.requestId ? `${message} 문의 번호: ${error.requestId}` : message;
 }

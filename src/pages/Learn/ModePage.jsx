@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router';
 import { newKey } from '../../api/client';
-import { messageFor } from '../../api/errors';
+import { isTerminal } from '../../api/errors';
 import { chooseMode } from '../../api/sessions';
 import bookIcon from '../../assets/icons/book.svg';
 import chatIcon from '../../assets/icons/chat.svg';
@@ -13,6 +13,7 @@ import InlineError from '../../components/InlineError/InlineError';
 import StepBar from '../../components/StepBar/StepBar';
 import Tag from '../../components/Tag/Tag';
 import SessionGate from '../../learning/SessionGate';
+import { generationRecovery } from '../../learning/generationRecovery';
 import useLearningSession, { STAGE_ROUTES } from '../../learning/useLearningSession';
 import { SAMPLE_SESSION } from './learnSamples';
 import styles from './ModePage.module.css';
@@ -43,12 +44,16 @@ const MODES = [
 export default function ModePage() {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const { live, session, loadError, subject } = useLearningSession();
+  const { live, session, setSession, loadError, checking, refresh, subject } = useLearningSession({ verifyOnMount: true });
   const [modeId, setModeId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
   const keyRef = useRef(null);
+  const inFlight = useRef(false);
   const mode = MODES.find((item) => item.id === modeId);
+  const recovery = generationRecovery(session, error);
+  const locked = submitting || refreshing || recovery.blocked;
 
   const header = (
     <>
@@ -57,7 +62,7 @@ export default function ModePage() {
     </>
   );
 
-  if (live && !session) return <SessionGate loadError={loadError} header={header} />;
+  if (live && (checking || loadError || !session)) return <SessionGate loadError={loadError} header={header} />;
   if (live && session.stage !== 'mode') {
     return <Navigate to={STAGE_ROUTES[session.stage] ?? '/learn'} replace state={{ session, subject }} />;
   }
@@ -66,11 +71,13 @@ export default function ModePage() {
   const subjectName = live ? subject : (state?.subject ?? SAMPLE_SESSION.subject);
 
   async function handleStart() {
+    if (!mode || locked || inFlight.current) return;
     if (!live) {
       navigate(mode.next, { state: { concept: state?.concept, mode: mode.id } });
       return;
     }
-    setError('');
+    inFlight.current = true;
+    setError(null);
     setSubmitting(true);
     if (!keyRef.current) keyRef.current = newKey();
     try {
@@ -78,15 +85,25 @@ export default function ModePage() {
       keyRef.current = null;
       navigate(STAGE_ROUTES[next.stage] ?? mode.next, { state: { session: next, subject } });
     } catch (err) {
-      if (err.status !== 0) keyRef.current = null;
       const current = err.body?.currentSession;
+      if (current) setSession(current);
       if (current && current.stage !== 'mode') {
         navigate(STAGE_ROUTES[current.stage] ?? '/learn', { state: { session: current, subject } });
         return;
       }
+      setError(err);
+    } finally {
+      inFlight.current = false;
       setSubmitting(false);
-      setError(messageFor(err, '학습을 시작하지 못했어요. 잠시 후 다시 시도해 주세요.'));
     }
+  }
+
+  async function handleRefresh() {
+    if (refreshing || inFlight.current) return;
+    setRefreshing(true);
+    try { await refresh(); if (!isTerminal(error)) setError(null); }
+    catch (err) { if (!isTerminal(error)) setError(err); }
+    finally { setRefreshing(false); }
   }
 
   function handleChange() {
@@ -99,7 +116,7 @@ export default function ModePage() {
       header={header}
       footer={
         <BottomCTA>
-          <Button disabled={!mode || submitting} onClick={handleStart}>
+          <Button disabled={!mode || locked} onClick={handleStart}>
             {mode ? (submitting ? mode.loading : mode.start) : '학습 시작하기'}
           </Button>
         </BottomCTA>
@@ -111,7 +128,7 @@ export default function ModePage() {
             <p className={styles.conceptLabel}>선택한 개념</p>
             <p className={styles.conceptName}>{subjectName ? `${subjectName} · ${conceptName}` : conceptName}</p>
           </div>
-          <button type="button" className={styles.change} onClick={handleChange} disabled={submitting}>
+          <button type="button" className={styles.change} onClick={handleChange} disabled={locked}>
             변경
           </button>
         </div>
@@ -129,8 +146,8 @@ export default function ModePage() {
                   name="mode"
                   value={item.id}
                   checked={selected}
-                  disabled={submitting}
-                  onChange={() => setModeId(item.id)}
+                  disabled={locked}
+                  onChange={() => { keyRef.current = null; setModeId(item.id); }}
                   className={styles.radio}
                 />
                 <img src={item.icon} alt="" width="48" height="48" />
@@ -153,7 +170,10 @@ export default function ModePage() {
           })}
         </div>
 
-        {error && <InlineError>{error}</InlineError>}
+        {recovery.message && <InlineError>{recovery.message}</InlineError>}
+        {recovery.blocked && <Button variant="secondary" disabled={refreshing} onClick={handleRefresh}>
+          {refreshing ? '저장 상태를 확인하고 있어요...' : '저장 상태 확인'}
+        </Button>}
         <p className={styles.note}>두 방식 모두 설명 → 응용문제 → 성장 리포트로 이어져요</p>
       </div>
     </AppShell>

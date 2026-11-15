@@ -8,11 +8,12 @@ export function setCsrfToken(token) {
 }
 
 export class ApiError extends Error {
-  constructor(status, code = 'UNKNOWN', message = '', body = null) {
+  constructor(status, code = 'UNKNOWN', message = '', body = null, requestId = null) {
     super(message || `API error: ${status}`);
     this.status = status;
     this.code = code;
     this.body = body;
+    this.requestId = requestId;
   }
 }
 
@@ -61,7 +62,9 @@ export async function request(path, { method = 'GET', body, form, idempotencyKey
         return request(path, { method, body, form, idempotencyKey, retried: true });
       }
     }
-    throw new ApiError(response.status, data?.code ?? 'UNKNOWN', data?.message ?? '', data);
+    const reference = response.headers.get('X-Teachmi-Request-Id');
+    const requestId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(reference ?? '') ? reference : null;
+    throw new ApiError(response.status, data?.code ?? 'UNKNOWN', data?.message ?? '', data, requestId);
   }
 
   if (!isJson) throw new ApiError(response.status, 'NOT_JSON');
